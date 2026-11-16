@@ -1,0 +1,261 @@
+lightgbm imported from: installed site-packages
+==============================================================================
+PART 1  Leaf-wise vs level-wise, 8 rows, squared loss, lambda=0, eta=1
+==============================================================================
+y = [20, 10, 20, 18, 38, 34, 16, 28]  F0 = mean(y) = 23
+g = F0 - y = [3, 13, 3, 5, -15, -11, 7, -5]  G = 0  H = 8
+loss before the tree, sum 1/2 (F0-y)^2 = 316
+
+Root: every cut (gain uses the 1/2 factor of the XGBoost paper)
+  x <= 1:  G_L=   3 n_L=1  G_R=  -3 n_R=7  gain=    5.143
+  x <= 2:  G_L=  16 n_L=2  G_R= -16 n_R=6  gain=   85.333
+  x <= 3:  G_L=  19 n_L=3  G_R= -19 n_R=5  gain=   96.267
+  x <= 4:  G_L=  24 n_L=4  G_R= -24 n_R=4  gain=  144.000
+  x <= 5:  G_L=   9 n_L=5  G_R=  -9 n_R=3  gain=   21.600
+  x <= 6:  G_L=  -2 n_L=6  G_R=   2 n_R=2  gain=    1.333
+  x <= 7:  G_L=   5 n_L=7  G_R=  -5 n_R=1  gain=   14.286
+
+Candidate cuts inside left  (rows 1-4):
+  x <= 1:  G_L=   3  G_R=  21  gain=   6.000
+  x <= 2:  G_L=  16  G_R=   8  gain=   8.000
+  x <= 3:  G_L=  19  G_R=   5  gain=   0.667
+
+Candidate cuts inside right (rows 5-8):
+  x <= 5:  G_L= -15  G_R=  -9  gain=  54.000
+  x <= 6:  G_L= -26  G_R=   2  gain=  98.000
+  x <= 7:  G_L= -19  G_R=  -5  gain=   0.667
+
+Candidate cuts inside rows 5-6:
+  x <= 5:  G_L= -15  G_R= -11  gain=   4.000
+
+Candidate cuts inside rows 7-8:
+  x <= 7:  G_L=   7  G_R=  -5  gain=  36.000
+
+leaf-wise growth to 4 leaves:
+  split 1: rows 1,2,3,4,5,6,7,8 at x <= 4  gain=144
+           candidates before this split: [('rows 1,2,3,4,5,6,7,8', '144')]
+  split 2: rows 5,6,7,8 at x <= 6  gain=98
+           candidates before this split: [('rows 1,2,3,4', '8'), ('rows 5,6,7,8', '98')]
+  split 3: rows 7,8 at x <= 7  gain=36
+           candidates before this split: [('rows 1,2,3,4', '8'), ('rows 5,6', '4'), ('rows 7,8', '36')]
+  leaf rows 1,2,3,4 w = -G/H =   -6  prediction = 17.0
+  leaf rows 5,6     w = -G/H =   13  prediction = 36.0
+  leaf rows 7       w = -G/H =   -7  prediction = 16.0
+  leaf rows 8       w = -G/H =    5  prediction = 28.0
+  total gain = 278  loss after = 38  (check: 316 - 278 = 38)  depth = 3
+
+level-wise growth to 4 leaves:
+  split 1: rows 1,2,3,4,5,6,7,8 at x <= 4  gain=144
+  split 2: rows 1,2,3,4 at x <= 2  gain=8
+  split 3: rows 5,6,7,8 at x <= 6  gain=98
+  leaf rows 1,2     w = -G/H =   -8  prediction = 15.0
+  leaf rows 3,4     w = -G/H =   -4  prediction = 19.0
+  leaf rows 5,6     w = -G/H =   13  prediction = 36.0
+  leaf rows 7,8     w = -G/H =   -1  prediction = 22.0
+  total gain = 250  loss after = 66  (check: 316 - 250 = 66)  depth = 2
+
+LightGBM check (lightgbm 4.7.0)
+
+  leaf-wise params {'num_leaves': 4, 'max_depth': -1}
+    split x <= 4.500000000000001  split_gain=288.000000 count=8
+      leaf value=17.000000 count=4
+      split x <= 6.500000000000001  split_gain=196.000000 count=4
+        leaf value=36.000000 count=2
+        split x <= 7.500000000000001  split_gain=72.000000 count=2
+          leaf value=16.000000 count=1
+          leaf value=28.000000 count=1
+    predict = [17.0, 17.0, 17.0, 17.0, 36.0, 36.0, 16.0, 28.0]
+    hand    = [17.0, 17.0, 17.0, 17.0, 36.0, 36.0, 16.0, 28.0]
+    max |difference| = 7.11e-15
+
+  level-wise params {'num_leaves': 4, 'max_depth': 2}
+    split x <= 4.500000000000001  split_gain=288.000000 count=8
+      split x <= 2.5000000000000004  split_gain=16.000000 count=4
+        leaf value=15.000000 count=2
+        leaf value=19.000000 count=2
+      split x <= 6.500000000000001  split_gain=196.000000 count=4
+        leaf value=36.000000 count=2
+        leaf value=22.000000 count=2
+    predict = [15.0, 15.0, 19.0, 19.0, 36.0, 36.0, 22.0, 22.0]
+    hand    = [15.0, 15.0, 19.0, 19.0, 36.0, 36.0, 22.0, 22.0]
+    max |difference| = 7.11e-15
+  Note: LightGBM's split_gain has no 1/2 factor, so it should be 2x the hand gain.
+  Note: with boost_from_average the first tree's leaf values include F0.
+
+==============================================================================
+PART 2  GOSS on 10 rows, a = top_rate = 0.2, b = other_rate = 0.2
+==============================================================================
+g = [-3.0, 2.5, 0.4, -0.2, 0.3, -0.5, 0.1, 0.6, -0.4, 0.2]
+exact sum of g = 0.0
+top 2 rows by |g|: [1, 2]  (g = [-3.0, 2.5])
+rest (8 rows) sum of g = 0.5
+sample 2 of the 8 rest rows, weight (1-a)/b = 4
+each rest row is drawn with probability 2/8 = 1/4, so E[weight] = 1
+all C(8,2) = 28 possible draws:
+  mean of the GOSS estimate = 0.0  (exact 0.0)
+  min = -4.1  max = 3.5
+example draw rows [8, 9] (g = [0.6, -0.4]): estimate = -0.5 + 4 x (0.2) = 0.3
+  without re-weighting the mean would be -0.375
+
+==============================================================================
+PART 3  EFB: three mutually exclusive sparse features, bins + offsets
+==============================================================================
+rows where more than one feature is non-zero (conflicts): 0
+offsets: A +0, B +2, C +5
+row  A  B  C  -> bundle bin
+  1  1  0  0  -> 1
+  2  0  3  0  -> 5
+  3  0  0  1  -> 6
+  4  2  0  0  -> 2
+  5  0  1  0  -> 3
+  6  0  0  0  -> 0
+bundle bin ranges: A -> 1..2, B -> 3..5, C -> 6; bin 0 = all three zero
+lightgbm 4.7.0 from installed site-packages
+xgboost 3.4.1, numpy 2.5.5, python 3.13.14
+
+==============================================================================
+PART A  Defaults resolved by lightgbm 4.7.0
+==============================================================================
+  boosting                   = gbdt
+  data_sample_strategy       = bagging
+  num_iterations             = 1
+  learning_rate              = 0.1
+  num_leaves                 = 31
+  max_depth                  = -1
+  min_data_in_leaf           = 20
+  min_sum_hessian_in_leaf    = 0.001
+  min_gain_to_split          = 0
+  lambda_l1                  = 0
+  lambda_l2                  = 0
+  feature_fraction           = 1
+  bagging_fraction           = 1
+  bagging_freq               = 0
+  top_rate                   = 0.2
+  other_rate                 = 0.1
+  max_bin                    = 255
+  min_data_in_bin            = 3
+  enable_bundle              = 1
+  feature_pre_filter         = 1
+  max_cat_to_onehot          = 4
+  max_cat_threshold          = 32
+  cat_smooth                 = 10
+  cat_l2                     = 10
+  min_data_per_group         = 100
+  boost_from_average         = 1
+
+  scikit-learn wrapper LGBMClassifier() defaults:
+  boosting_type              = gbdt
+  class_weight               = None
+  colsample_bytree           = 1.0
+  importance_type            = split
+  learning_rate              = 0.1
+  max_depth                  = -1
+  min_child_samples          = 20
+  min_child_weight           = 0.001
+  min_split_gain             = 0.0
+  n_estimators               = 100
+  n_jobs                     = None
+  num_leaves                 = 31
+  objective                  = None
+  random_state               = None
+  reg_alpha                  = 0.0
+  reg_lambda                 = 0.0
+  subsample                  = 1.0
+  subsample_for_bin          = 200000
+  subsample_freq             = 0
+
+==============================================================================
+PART B  Breast cancer, stratified 398/171 split, seeds 42..51 (mean over 10 splits)
+==============================================================================
+  train rows = 398, test rows = 171
+
+  B1  num_leaves sweep, 100 trees, learning_rate 0.1, everything else default
+      train acc / test acc / test log loss / mean leaves actually grown per tree
+
+      min_data_in_leaf = 20
+      num_leaves=   2  train 0.9912  test 0.9579 (sd 0.0130)  logloss 0.1144  leaves/tree   2.00
+      num_leaves=   4  train 1.0000  test 0.9620 (sd 0.0137)  logloss 0.1140  leaves/tree   4.00
+      num_leaves=   8  train 1.0000  test 0.9608 (sd 0.0128)  logloss 0.1411  leaves/tree   7.99
+      num_leaves=  16  train 1.0000  test 0.9614 (sd 0.0112)  logloss 0.1392  leaves/tree  15.83
+      num_leaves=  31  train 1.0000  test 0.9608 (sd 0.0111)  logloss 0.1358  leaves/tree  21.46
+      num_leaves=  63  train 1.0000  test 0.9608 (sd 0.0111)  logloss 0.1358  leaves/tree  21.47
+      num_leaves= 127  train 1.0000  test 0.9608 (sd 0.0111)  logloss 0.1358  leaves/tree  21.47
+
+      min_data_in_leaf = 1
+      num_leaves=   2  train 0.9910  test 0.9591 (sd 0.0141)  logloss 0.1145  leaves/tree   2.00
+      num_leaves=   4  train 1.0000  test 0.9573 (sd 0.0157)  logloss 0.1170  leaves/tree   4.00
+      num_leaves=   8  train 1.0000  test 0.9608 (sd 0.0111)  logloss 0.1670  leaves/tree   8.00
+      num_leaves=  16  train 1.0000  test 0.9351 (sd 0.0168)  logloss 0.3958  leaves/tree  15.83
+      num_leaves=  31  train 1.0000  test 0.9404 (sd 0.0147)  logloss 0.3701  leaves/tree  23.80
+      num_leaves=  63  train 1.0000  test 0.9404 (sd 0.0147)  logloss 0.3703  leaves/tree  24.20
+      num_leaves= 127  train 1.0000  test 0.9404 (sd 0.0147)  logloss 0.3703  leaves/tree  24.20
+
+  B2  Library defaults on the same 10 splits (100 trees each, n_jobs fixed)
+      LightGBM default                   test acc 0.9608 (sd 0.0111)  min 0.9357  logloss 0.1358  leaves/tree 21.46
+      LightGBM min_data_in_leaf=1        test acc 0.9404 (sd 0.0147)  min 0.9181  logloss 0.3701  leaves/tree 23.80
+      XGBoost default (hist, depth 6)    test acc 0.9567 (sd 0.0129)  min 0.9298  logloss 0.1022  leaves/tree 3.28
+      XGBoost lossguide max_leaves=31    test acc 0.9567 (sd 0.0129)  min 0.9298  logloss 0.1022  leaves/tree 3.28
+      per-split accuracy difference LightGBM - XGBoost: [0.0058, 0.0, -0.0058, 0.0117, 0.0, 0.0175, 0.0292, -0.0058, 0.0058, -0.0175]
+      (one test row = 0.0058 accuracy)
+
+  B3  Smaller training sets (stratified subsample of the 398 training rows, seeds 42..51)
+      n_train=  50  LightGBM default 0.9368  LightGBM min_data_in_leaf=1 0.8959  XGBoost default 0.9257
+      n_train= 100  LightGBM default 0.9480  LightGBM min_data_in_leaf=1 0.9152  XGBoost default 0.9456
+      n_train= 200  LightGBM default 0.9515  LightGBM min_data_in_leaf=1 0.9199  XGBoost default 0.9480
+      n_train= 398  LightGBM default 0.9608  LightGBM min_data_in_leaf=1 0.9404  XGBoost default 0.9567
+
+==============================================================================
+PART C  Covertype (binary: Lodgepole Pine vs rest), 200 rounds, lr 0.1, 8 threads, median of 5 runs
+==============================================================================
+  full data (581012, 54), positive rate 0.4876, cpu count 20
+  fixed test set: 100000 rows; training pool: 481012 rows
+  NOTE: other jobs were running on this machine; timings are indicative only.
+
+  n_train = 10000
+    LightGBM (default, num_leaves=31)      time    0.18 s  (runs 0.19, 0.17, 0.18, 0.20, 0.17)  test acc 0.8313
+    LightGBM GOSS                          time    0.21 s  (runs 0.23, 0.20, 0.21, 0.21, 0.21)  test acc 0.8230
+    LightGBM enable_bundle=false           time    0.21 s  (runs 0.20, 0.23, 0.21, 0.19, 0.23)  test acc 0.8313
+    XGBoost hist depthwise max_depth=6     time    0.61 s  (runs 0.64, 0.60, 0.59, 0.61, 0.67)  test acc 0.8233
+    XGBoost hist lossguide max_leaves=31   time    0.91 s  (runs 0.91, 0.94, 0.97, 0.91, 0.83)  test acc 0.8308
+
+  n_train = 50000
+    LightGBM (default, num_leaves=31)      time    0.39 s  (runs 0.41, 0.43, 0.38, 0.39, 0.38)  test acc 0.8583
+    LightGBM GOSS                          time    0.52 s  (runs 0.50, 0.47, 0.56, 0.55, 0.52)  test acc 0.8614
+    LightGBM enable_bundle=false           time    0.46 s  (runs 0.47, 0.47, 0.46, 0.45, 0.44)  test acc 0.8583
+    XGBoost hist depthwise max_depth=6     time    1.03 s  (runs 1.10, 1.01, 1.03, 1.11, 1.03)  test acc 0.8460
+    XGBoost hist lossguide max_leaves=31   time    1.23 s  (runs 1.26, 1.32, 1.21, 1.21, 1.23)  test acc 0.8558
+
+  n_train = 200000
+    LightGBM (default, num_leaves=31)      time    0.95 s  (runs 0.97, 0.95, 0.95, 0.91, 0.94)  test acc 0.8651
+    LightGBM GOSS                          time    1.15 s  (runs 1.08, 1.12, 1.15, 1.20, 1.23)  test acc 0.8709
+    LightGBM enable_bundle=false           time    1.00 s  (runs 1.08, 1.00, 1.02, 1.00, 0.98)  test acc 0.8651
+    XGBoost hist depthwise max_depth=6     time    1.97 s  (runs 2.14, 2.07, 1.86, 1.90, 1.97)  test acc 0.8500
+    XGBoost hist lossguide max_leaves=31   time    3.94 s  (runs 3.47, 4.45, 3.94, 4.35, 3.92)  test acc 0.8611
+
+  n_train = 481012
+    LightGBM (default, num_leaves=31)      time    2.75 s  (runs 2.84, 2.68, 2.73, 2.75, 2.76)  test acc 0.8642
+    LightGBM GOSS                          time    3.25 s  (runs 3.25, 3.09, 3.15, 3.50, 3.51)  test acc 0.8701
+    LightGBM enable_bundle=false           time    2.61 s  (runs 2.92, 2.57, 2.87, 2.60, 2.61)  test acc 0.8642
+    XGBoost hist depthwise max_depth=6     time    5.58 s  (runs 6.14, 5.58, 5.40, 5.58, 5.18)  test acc 0.8555
+    XGBoost hist lossguide max_leaves=31   time    5.51 s  (runs 5.35, 5.97, 5.52, 5.51, 4.68)  test acc 0.8647
+
+==============================================================================
+PART D  Parameter behaviour checks, lightgbm 4.7.0
+==============================================================================
+
+  params {'boosting': 'goss'}  (LightGBM warnings, if any, are printed by the library above/below)
+[LightGBM] [Warning] Found boosting=goss. For backwards compatibility reasons, LightGBM interprets this as boosting=gbdt, data_sample_strategy=goss.To suppress this warning, set data_sample_strategy=goss instead.
+[LightGBM] [Warning] Found boosting=goss. For backwards compatibility reasons, LightGBM interprets this as boosting=gbdt, data_sample_strategy=goss.To suppress this warning, set data_sample_strategy=goss instead.
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+  resolved: [boosting: gbdt] [data_sample_strategy: goss]
+
+  params {'data_sample_strategy': 'goss'}  (LightGBM warnings, if any, are printed by the library above/below)
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+  resolved: [boosting: gbdt] [data_sample_strategy: goss]
+[LightGBM] [Warning] min_data_in_leaf is set=1, min_child_samples=3 will be ignored. Current value: min_data_in_leaf=1
+[LightGBM] [Warning] min_data_in_leaf is set=1, min_child_samples=3 will be ignored. Current value: min_data_in_leaf=1
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+
+  min_data_in_leaf=1 together with alias min_child_samples=3 -> [min_data_in_leaf: 1]

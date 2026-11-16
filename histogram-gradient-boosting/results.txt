@@ -1,0 +1,65 @@
+python 3.13.14, scikit-learn 1.9.1, Intel64 Family 6 Model 186 Stepping 2, GenuineIntel (20 logical CPUs)
+Covertype: 581012 rows x 54 features, positive rate (Spruce/Fir) 0.3646
+Test set: 50000 fixed rows. Repeats per timing: 3 (median reported).
+
+== 1. Training time (s, median) and test accuracy vs training rows ==
+  n=   1000  GBC (depth 3)                time=   0.204s  (runs 0.208, 0.204, 0.204)  acc=0.7727
+  n=   1000  HGB depth 3, 1 thread        time=   0.058s  (runs 0.087, 0.058, 0.057)  acc=0.7698
+  n=   1000  HGB depth 3, all threads     time=   0.081s  (runs 0.079, 0.081, 0.086)  acc=0.7698
+  n=   1000  HGB 31 leaves, all threads   time=   0.270s  (runs 0.273, 0.270, 0.262)  acc=0.7687
+
+  n=   3000  GBC (depth 3)                time=   0.547s  (runs 0.590, 0.541, 0.547)  acc=0.7847
+  n=   3000  HGB depth 3, 1 thread        time=   0.094s  (runs 0.094, 0.094, 0.094)  acc=0.7843
+  n=   3000  HGB depth 3, all threads     time=   0.107s  (runs 0.107, 0.088, 0.107)  acc=0.7843
+  n=   3000  HGB 31 leaves, all threads   time=   0.281s  (runs 0.281, 0.299, 0.269)  acc=0.8046
+
+  n=  10000  GBC (depth 3)                time=   1.791s  (runs 1.900, 1.791, 1.765)  acc=0.7970
+  n=  10000  HGB depth 3, 1 thread        time=   0.224s  (runs 0.228, 0.222, 0.224)  acc=0.7931
+  n=  10000  HGB depth 3, all threads     time=   0.134s  (runs 0.134, 0.122, 0.147)  acc=0.7931
+  n=  10000  HGB 31 leaves, all threads   time=   0.375s  (runs 0.323, 0.405, 0.375)  acc=0.8372
+
+  n=  30000  GBC (depth 3)                time=   5.455s  (runs 5.623, 5.455, 5.432)  acc=0.8021
+  n=  30000  HGB depth 3, 1 thread        time=   0.624s  (runs 0.624, 0.668, 0.600)  acc=0.7963
+  n=  30000  HGB depth 3, all threads     time=   0.200s  (runs 0.192, 0.200, 0.214)  acc=0.7963
+  n=  30000  HGB 31 leaves, all threads   time=   0.500s  (runs 0.500, 0.469, 0.703)  acc=0.8513
+
+  n= 100000  GBC (depth 3)                time=  27.157s  (runs 26.666, 27.157, 27.797)  acc=0.8037
+  n= 100000  HGB depth 3, 1 thread        time=   2.181s  (runs 2.181, 2.121, 2.220)  acc=0.7985
+  n= 100000  HGB depth 3, all threads     time=   0.507s  (runs 0.505, 0.507, 0.519)  acc=0.7985
+  n= 100000  HGB 31 leaves, all threads   time=   0.890s  (runs 0.890, 0.857, 0.964)  acc=0.8543
+
+  n= 300000  GBC (depth 3)                time= 138.232s  (runs 138.232)  acc=0.8046
+  n= 300000  HGB depth 3, 1 thread        time=  10.164s  (runs 10.164, 10.149, 11.396)  acc=0.7999
+  n= 300000  HGB depth 3, all threads     time=   2.043s  (runs 2.043, 2.002, 2.092)  acc=0.7999
+  n= 300000  HGB 31 leaves, all threads   time=   3.781s  (runs 3.391, 3.781, 3.900)  acc=0.8563
+
+Speed-up of HGB over GBC (GBC time / HGB time):
+  HGB depth 3, 1 thread        1000:   3.5x  3000:   5.8x  10000:   8.0x  30000:   8.7x  100000:  12.5x  300000:  13.6x
+  HGB depth 3, all threads     1000:   2.5x  3000:   5.1x  10000:  13.3x  30000:  27.3x  100000:  53.5x  300000:  67.7x
+  HGB 31 leaves, all threads   1000:   0.8x  3000:   2.0x  10000:   4.8x  30000:  10.9x  100000:  30.5x  300000:  36.6x
+
+== 2. max_bins at n=100000 (HGB 31 leaves, 100 trees, all threads) ==
+  max_bins=  2  test acc=0.7885  train acc=0.7915  time=1.762s
+  max_bins=  4  test acc=0.8226  train acc=0.8278  time=1.704s
+  max_bins=  8  test acc=0.8431  train acc=0.8461  time=1.729s
+  max_bins= 16  test acc=0.8527  train acc=0.8546  time=1.653s
+  max_bins= 32  test acc=0.8525  train acc=0.8567  time=1.641s
+  max_bins= 64  test acc=0.8544  train acc=0.8590  time=2.192s
+  max_bins=128  test acc=0.8536  train acc=0.8584  time=1.766s
+  max_bins=255  test acc=0.8543  train acc=0.8601  time=1.750s
+
+== 3. Default early_stopping='auto' at n=100000 ==
+  early_stopping=auto  max_iter=100   -> trees built=100   test acc=0.8530  time=1.74s
+  early_stopping=auto  max_iter=1000  -> trees built=1000  test acc=0.9285  time=16.26s
+  early_stopping=False max_iter=1000  -> trees built=1000  test acc=0.9323  time=14.49s
+
+== 4. One-hot columns vs native categorical (n=100000) ==
+  54 columns (44 one-hot)        test acc=0.8543  time=1.909s
+  12 columns, 2 categorical      test acc=0.8609  time=1.245s
+  12 columns, codes as numbers   test acc=0.8553  time=1.266s
+
+== 5. 20% of the 10 numeric cells set to NaN (train and test), n=100000 ==
+  no NaN (reference)       test acc=0.8543
+  native NaN handling      test acc=0.8112
+  mean imputation + HGB    test acc=0.8111
+

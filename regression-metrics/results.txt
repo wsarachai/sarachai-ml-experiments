@@ -1,0 +1,143 @@
+scikit-learn 1.9.1, numpy 2.5.5, seed 42
+==============================================================================
+1. HAND CALCULATION (6 rows)
+==============================================================================
+y       [4.0, 6.0, 7.0, 9.0, 10.0, 12.0]
+y_hat   [3.0, 7.0, 5.0, 11.0, 10.0, 12.0]
+error   [1.0, -1.0, 2.0, -2.0, 0.0, 0.0]
+mean(y) 8.0  SSE 10.0  SST 42.0
+  MSE    hand 1.6667   sklearn 1.6667
+  RMSE   hand 1.2910   sklearn 1.2910
+  MAE    hand 1.0000   sklearn 1.0000
+  MedAE  hand 1.0000   sklearn 1.0000
+  R2     hand 0.7619   sklearn 0.7619
+
+-- one outlier: row 6 true value 12 -> 30, prediction unchanged (12)
+mean(y) 11.0  SSE 334.0  SST 456.0
+  MSE    hand 55.6667   sklearn 55.6667   ratio after/before 33.40
+  RMSE   hand 7.4610   sklearn 7.4610   ratio after/before 5.78
+  MAE    hand 4.0000   sklearn 4.0000   ratio after/before 4.00
+  MedAE  hand 1.5000   sklearn 1.5000   ratio after/before 1.50
+  R2     hand 0.2675   sklearn 0.2675   ratio after/before 0.35
+
+-- best constant prediction c for y = [4.0, 6.0, 7.0, 9.0, 10.0, 30.0]
+  c =  7: sum|y-c| = 32   sum(y-c)^2 = 552
+  c =  8: sum|y-c| = 32   sum(y-c)^2 = 510
+  c =  9: sum|y-c| = 32   sum(y-c)^2 = 480
+  c = 11: sum|y-c| = 38   sum(y-c)^2 = 456
+  grid search: SSE minimised at c = 11.00 (mean 11.00); SAE minimised on [7.00, 9.00] (median 8.00)
+  DummyRegressor mean -> 11.00, median -> 8.00
+  R2 of the constant 11 (the mean) on these rows: 0.0000
+  R2 of the constant 8 (the median) on these rows: -0.1184  (hand 1 - 510/456)
+
+-- pinball loss on the clean rows y = [4.0, 6.0, 7.0, 9.0, 10.0, 12.0]
+  q=0.1 constant 5.0: u = [-1.0, 1.0, 2.0, 4.0, 5.0, 7.0]  terms = [0.9, 0.1, 0.2, 0.4, 0.5, 0.7]  sum 2.80  mean 0.4667  (sklearn 0.4667)
+  q=0.9 constant 11.0: u = [-7.0, -5.0, -4.0, -2.0, -1.0, 1.0]  terms = [0.7, 0.5, 0.4, 0.2, 0.1, 0.9]  sum 2.80  mean 0.4667  (sklearn 0.4667)
+  q=0.9 constant 5.0: u = [-1.0, 1.0, 2.0, 4.0, 5.0, 7.0]  terms = [0.1, 0.9, 1.8, 3.6, 4.5, 6.3]  sum 17.20  mean 2.8667  (sklearn 2.8667)
+  q=0.1 constant 11.0: u = [-7.0, -5.0, -4.0, -2.0, -1.0, 1.0]  terms = [6.3, 4.5, 3.6, 1.8, 0.9, 0.1]  sum 17.20  mean 2.8667  (sklearn 2.8667)
+  interval [5, 11] covers 4/6 = 0.6667, width 6
+  pinball(q=0.5) of the toy predictions = 0.5000 = MAE/2 (1.0000/2)
+  constant minimising pinball q=0.1: c = 4.00
+  constant minimising pinball q=0.9: c = 12.00
+
+-- percentage errors near zero
+  y [0.1, 10.0] y_hat [0.6, 10.5]  abs error [0.5, 0.5]  APE [5.0, 0.05]
+  MAE 0.5000  MAPE 2.5250
+  sMAPE (2|e|/(|y|+|y_hat|), mean) 0.7387
+  RMSLE 0.2668
+  MAPE with y = 0 exactly: 1.126e+15
+
+==============================================================================
+2. CALIFORNIA HOUSING: baselines vs models
+==============================================================================
+rows 20640, features 8; target = median house value in 100,000 USD
+target min 0.14999 max 5.00001 mean 2.0686 median 1.7970
+rows with target >= 5.0 (the cap): 992 (0.0481); distinct max value 5.00001
+train 16512 / test 4128; capped in test 184
+Dummy (mean)                 MSE 1.3107  RMSE 1.1449  MAE 0.9061  MedAE 0.7505  R2 -0.0002  MAPE 0.6289   (0.0s)
+Dummy (median)               MSE 1.3762  RMSE 1.1731  MAE 0.8740  MedAE 0.6735  R2 -0.0502  MAPE 0.5310   (0.0s)
+LinearRegression             MSE 0.5559  RMSE 0.7456  MAE 0.5332  MedAE 0.4102  R2 0.5758  MAPE 0.3195   (0.0s)
+RandomForest (300)           MSE 0.2538  RMSE 0.5038  MAE 0.3267  MedAE 0.1987  R2 0.8063  MAPE 0.1883   (3.5s)
+  (RF on its own train rows) RMSE 0.1852  R2 0.9744
+HistGradientBoosting         MSE 0.1936  RMSE 0.4400  MAE 0.2885  MedAE 0.1824  R2 0.8523  MAPE 0.1679   (1.9s)
+R2 of predicting the TRAIN mean on test: -0.000219
+R2 of predicting the TEST mean on test:  0.000000
+R2 of predicting train mean + 0.5 on test: -0.2039  (negative R2 on test)
+
+-- residuals of HistGradientBoosting on test
+mean residual -0.0042; capped rows (y>=5): n=184, mean residual 0.5486, max prediction on them 5.3306, share predicted below 5.0 0.7826
+predictions above 5.0: 42 of 4128; max prediction 5.3306
+  predicted <1   n= 571  mean residual -0.0056  residual sd 0.2059
+  predicted 1-2  n=1754  mean residual -0.0130  residual sd 0.3497
+  predicted 2-3  n=1069  mean residual -0.0150  residual sd 0.5246
+  predicted 3-4  n= 459  mean residual +0.0412  residual sd 0.6754
+  predicted >=4  n= 275  mean residual +0.0212  residual sd 0.4491
+LinearRegression: predictions above 5.0: 39, max 11.5003, min -1.0138
+RandomForest (300): predictions above 5.0: 15, max 5.0000, min 0.4916
+HGB metrics on uncapped test rows only: RMSE 0.4069 MAE 0.2740; on capped rows: RMSE 0.8911 MAE 0.6000
+
+==============================================================================
+3. TRAINING LOSS vs EVALUATION METRIC (GradientBoostingRegressor)
+==============================================================================
+corrupted copy: 825 training targets (5%) shifted by +10.0; test set untouched
+
+-- clean training targets
+squared_error                MSE 0.2286  RMSE 0.4781  MAE 0.3184  MedAE 0.2080  R2 0.8255  MAPE 0.1860   (12.1s)
+                             init (F0) = 2.0719  (train mean 2.0719, train median 1.7985)
+absolute_error               MSE 0.2546  RMSE 0.5046  MAE 0.3235  MedAE 0.1984  R2 0.8057  MAPE 0.1759   (10.1s)
+                             init (F0) = 1.7985  (train mean 2.0719, train median 1.7985)
+huber                        MSE 0.2338  RMSE 0.4835  MAE 0.3141  MedAE 0.1976  R2 0.8216  MAPE 0.1774   (10.9s)
+                             init (F0) = 1.7985  (train mean 2.0719, train median 1.7985)
+
+-- 5% corrupted training targets
+squared_error                MSE 0.7621  RMSE 0.8730  MAE 0.6645  MedAE 0.5491  R2 0.4184  MAPE 0.4679   (9.2s)
+                             init (F0) = 2.5716  (train mean 2.5716, train median 1.8660)
+absolute_error               MSE 0.2552  RMSE 0.5052  MAE 0.3288  MedAE 0.2053  R2 0.8053  MAPE 0.1831   (10.9s)
+                             init (F0) = 1.8660  (train mean 2.5716, train median 1.8660)
+huber                        MSE 0.2527  RMSE 0.5027  MAE 0.3341  MedAE 0.2188  R2 0.8072  MAPE 0.1994   (10.5s)
+                             init (F0) = 1.8660  (train mean 2.5716, train median 1.8660)
+
+==============================================================================
+4. QUANTILE GRADIENT BOOSTING: 90% interval from q = 0.05 and 0.95
+==============================================================================
+
+-- HistGradientBoostingRegressor (5.0s)
+  q=0.05 pinball(test) 0.0379  share of test y below prediction 0.0991   (train 0.0472)
+  q=0.5  pinball(test) 0.1474  share of test y below prediction 0.5107   (train 0.4959)
+  q=0.95 pinball(test) 0.0604  share of test y below prediction 0.9002   (train 0.9314)
+  90% interval: test coverage 0.8014  (train 0.8846); mean width 1.1763, median width 1.0303, min -0.0218, max 4.7492
+  crossing: rows with q0.05 > q0.95: 2; rows where median lies outside [q0.05, q0.95]: 80
+  coverage on uncapped test rows 0.8294; on capped rows 0.2011 (n=184)
+    median prediction in [0, 1.5): n=1487  coverage 0.7909  mean width 0.7549
+    median prediction in [1.5, 2.5): n=1567  coverage 0.8430  mean width 1.2104
+    median prediction in [2.5, 3.5): n= 659  coverage 0.8331  mean width 1.7314
+    median prediction in [3.5, 10): n= 415  coverage 0.6313  mean width 1.6765
+
+-- GradientBoostingRegressor (29.9s)
+  q=0.05 pinball(test) 0.0397  share of test y below prediction 0.0666   (train 0.0491)
+  q=0.5  pinball(test) 0.1617  share of test y below prediction 0.4978   (train 0.4996)
+  q=0.95 pinball(test) 0.0697  share of test y below prediction 0.9251   (train 0.9281)
+  90% interval: test coverage 0.8585  (train 0.8791); mean width 1.5197, median width 1.4203, min 0.0005, max 4.0594
+  crossing: rows with q0.05 > q0.95: 0; rows where median lies outside [q0.05, q0.95]: 58
+  coverage on uncapped test rows 0.8859; on capped rows 0.2717 (n=184)
+    median prediction in [0, 1.5): n=1502  coverage 0.8782  mean width 1.1882
+    median prediction in [1.5, 2.5): n=1554  coverage 0.8797  mean width 1.4791
+    median prediction in [2.5, 3.5): n= 697  coverage 0.8651  mean width 2.0706
+    median prediction in [3.5, 10): n= 375  coverage 0.6800  mean width 1.9916
+
+-- naive interval: squared-error HGB +- 1.645 x TRAIN RMSE (0.3055): width 1.0051, test coverage 0.8382
+
+==============================================================================
+5. EXTRAPOLATION
+==============================================================================
+synthetic: y = 2x + N(0, 1), 200 training points with x in [0, 10]; max training y 21.2270
+  LinearRegression         RMSE vs true line inside [0,10] 0.1933  outside (10,15] 0.5268  prediction at x=15: 30.6797 (true 30)
+  DecisionTree (depth 6)   RMSE vs true line inside [0,10] 0.7295  outside (10,15] 5.2711  prediction at x=15: 20.6893 (true 30)
+  RandomForest (300)       RMSE vs true line inside [0,10] 0.6766  outside (10,15] 5.3416  prediction at x=15: 20.6053 (true 30)
+  HistGradientBoosting     RMSE vs true line inside [0,10] 0.5198  outside (10,15] 6.8283  prediction at x=15: 18.9117 (true 30)
+
+-- California: train only on houses with target < 3.0, test on the rest
+  train rows 16774 (max target 2.99700); out-of-range rows 3866 (target 3.0 to 5.00001, mean 4.0345)
+  LinearRegression         max prediction 5.3346  share of predictions >= 3.0 0.1904  RMSE 1.6688  MAE 1.4993  mean prediction 2.5398
+  RandomForest (300)       max prediction 2.8915  share of predictions >= 3.0 0.0000  RMSE 1.7012  MAE 1.5318  mean prediction 2.5028
+  HistGradientBoosting     max prediction 3.4309  share of predictions >= 3.0 0.1156  RMSE 1.5217  MAE 1.3527  mean prediction 2.6819

@@ -1,0 +1,166 @@
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\model_selection\_split.py:86: UserWarning: The groups parameter is ignored by KFold
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\model_selection\_split.py:884: UserWarning: The groups parameter is ignored by StratifiedKFold
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\model_selection\_split.py:1269: UserWarning: The groups parameter is ignored by TimeSeriesSplit
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\preprocessing\_target_encoder.py:342: FutureWarning: `TargetEncoder.shuffle` and `TargetEncoder.random_state` are deprecated in version 1.9 and will be removed in version 1.11. Pass a cross-validation generator as `cv` argument to specify the shuffling behaviour instead.
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\preprocessing\_target_encoder.py:342: FutureWarning: `TargetEncoder.shuffle` and `TargetEncoder.random_state` are deprecated in version 1.9 and will be removed in version 1.11. Pass a cross-validation generator as `cv` argument to specify the shuffling behaviour instead.
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\preprocessing\_target_encoder.py:342: FutureWarning: `TargetEncoder.shuffle` and `TargetEncoder.random_state` are deprecated in version 1.9 and will be removed in version 1.11. Pass a cross-validation generator as `cv` argument to specify the shuffling behaviour instead.
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\preprocessing\_target_encoder.py:342: FutureWarning: `TargetEncoder.shuffle` and `TargetEncoder.random_state` are deprecated in version 1.9 and will be removed in version 1.11. Pass a cross-validation generator as `cv` argument to specify the shuffling behaviour instead.
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\preprocessing\_target_encoder.py:342: FutureWarning: `TargetEncoder.shuffle` and `TargetEncoder.random_state` are deprecated in version 1.9 and will be removed in version 1.11. Pass a cross-validation generator as `cv` argument to specify the shuffling behaviour instead.
+  warnings.warn(
+C:\Users\ASUS\workspaces\projects\sarachai-ml-experiments\.venv\Lib\site-packages\sklearn\preprocessing\_target_encoder.py:342: FutureWarning: `TargetEncoder.shuffle` and `TargetEncoder.random_state` are deprecated in version 1.9 and will be removed in version 1.11. Pass a cross-validation generator as `cv` argument to specify the shuffling behaviour instead.
+  warnings.warn(
+scikit-learn 1.9.1, numpy 2.5.5, pandas 3.1.1
+
+==============================================================================
+1. Hand example: 12 rows, 4 positives (rows 7, 8, 11, 12), 5 groups
+==============================================================================
+row    :  1  2  3  4  5  6  7  8  9 10 11 12
+y      :  0  0  0  0  0  0  1  1  0  0  1  1
+group  :  A  A  A  B  B  B  C  C  D  D  E  E
+overall positive share = 0.3333
+
+KFold(3)
+  fold 1: test rows [1, 2, 3, 4]  test pos 0/4 = 0.0000 | train pos 4/8 = 0.5000 | train rows [5, 6, 7, 8, 9, 10, 11, 12] | groups in both: ['B']
+  fold 2: test rows [5, 6, 7, 8]  test pos 2/4 = 0.5000 | train pos 2/8 = 0.2500 | train rows [1, 2, 3, 4, 9, 10, 11, 12] | groups in both: ['B']
+  fold 3: test rows [9, 10, 11, 12]  test pos 2/4 = 0.5000 | train pos 2/8 = 0.2500 | train rows [1, 2, 3, 4, 5, 6, 7, 8] | groups in both: none
+  -> matches the folds worked out by hand
+
+StratifiedKFold(3)
+  fold 1: test rows [1, 2, 3, 7]  test pos 1/4 = 0.2500 | train pos 3/8 = 0.3750 | train rows [4, 5, 6, 8, 9, 10, 11, 12] | groups in both: ['C']
+  fold 2: test rows [4, 5, 6, 8]  test pos 1/4 = 0.2500 | train pos 3/8 = 0.3750 | train rows [1, 2, 3, 7, 9, 10, 11, 12] | groups in both: ['C']
+  fold 3: test rows [9, 10, 11, 12]  test pos 2/4 = 0.5000 | train pos 2/8 = 0.2500 | train rows [1, 2, 3, 4, 5, 6, 7, 8] | groups in both: none
+  -> matches the folds worked out by hand
+
+GroupKFold(3)
+  fold 1: test rows [4, 5, 6, 7, 8]  test pos 2/5 = 0.4000 | train pos 2/7 = 0.2857 | train rows [1, 2, 3, 9, 10, 11, 12] | groups in both: none
+  fold 2: test rows [1, 2, 3]  test pos 0/3 = 0.0000 | train pos 4/9 = 0.4444 | train rows [4, 5, 6, 7, 8, 9, 10, 11, 12] | groups in both: none
+  fold 3: test rows [9, 10, 11, 12]  test pos 2/4 = 0.5000 | train pos 2/8 = 0.2500 | train rows [1, 2, 3, 4, 5, 6, 7, 8] | groups in both: none
+  -> matches the folds worked out by hand
+
+StratifiedGroupKFold(3)
+  fold 1: test rows [1, 2, 3, 11, 12]  test pos 2/5 = 0.4000 | train pos 2/7 = 0.2857 | train rows [4, 5, 6, 7, 8, 9, 10] | groups in both: none
+  fold 2: test rows [4, 5, 6]  test pos 0/3 = 0.0000 | train pos 4/9 = 0.4444 | train rows [1, 2, 3, 7, 8, 9, 10, 11, 12] | groups in both: none
+  fold 3: test rows [7, 8, 9, 10]  test pos 2/4 = 0.5000 | train pos 2/8 = 0.2500 | train rows [1, 2, 3, 4, 5, 6, 11, 12] | groups in both: none
+
+TimeSeriesSplit(3)
+  fold 1: test rows [4, 5, 6]  test pos 0/3 = 0.0000 | train pos 0/3 = 0.0000 | train rows [1, 2, 3] | groups in both: none
+  fold 2: test rows [7, 8, 9]  test pos 2/3 = 0.6667 | train pos 0/6 = 0.0000 | train rows [1, 2, 3, 4, 5, 6] | groups in both: none
+  fold 3: test rows [10, 11, 12]  test pos 2/3 = 0.6667 | train pos 2/9 = 0.2222 | train rows [1, 2, 3, 4, 5, 6, 7, 8, 9] | groups in both: ['D']
+
+TimeSeriesSplit(3, gap=1)
+  fold 1: test rows [4, 5, 6]  test pos 0/3 = 0.0000 | train pos 0/2 = 0.0000 | train rows [1, 2] | groups in both: none
+  fold 2: test rows [7, 8, 9]  test pos 2/3 = 0.6667 | train pos 0/5 = 0.0000 | train rows [1, 2, 3, 4, 5] | groups in both: none
+  fold 3: test rows [10, 11, 12]  test pos 2/3 = 0.6667 | train pos 2/8 = 0.2500 | train rows [1, 2, 3, 4, 5, 6, 7, 8] | groups in both: none
+
+==============================================================================
+2. check_cv: what an integer cv becomes
+==============================================================================
+  cv=5, classifier, binary y         -> StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
+  cv=5, classifier, multiclass y     -> StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
+  cv=5, classifier, continuous y     -> KFold(n_splits=5, random_state=None, shuffle=False)
+  cv=5, regressor, continuous y      -> KFold(n_splits=5, random_state=None, shuffle=False)
+  cv=5, regressor, binary y          -> KFold(n_splits=5, random_state=None, shuffle=False)
+  cv=None                                 -> KFold(n_splits=5, random_state=None, shuffle=False)
+
+Adult (OpenML 'adult' v2): 48842 rows, 14 features, positive (>50K) share 0.2393
+
+==============================================================================
+3. Variance of a CV estimate (Adult, n = 1000 per training sample)
+==============================================================================
+pool rows 28842, evaluation rows 20000, repeats R=40, n=1000
+model: HistGradientBoostingClassifier(max_iter=100, early_stopping=False), accuracy
+(took 60.7 s)
+true accuracy of the n=1000 model on 20000 unseen rows: mean 0.8357, sd across samples 0.0041
+
+estimator         mean     bias(est-true)  sd across samples  sd of (est-true)  corr(est,true)
+cv2              0.8237   -0.0120          0.0146             0.0134            +0.429
+cv5              0.8316   -0.0042          0.0153             0.0139            +0.458
+cv10             0.8326   -0.0032          0.0157             0.0146            +0.388
+rep5x10          0.8305   -0.0053          0.0143             0.0132            +0.400
+
+5-fold: mean fold sd 0.0245; naive SE = fold sd / sqrt(5) averages 0.0110; actual sd of the 5-fold mean across samples 0.0153; actual sd of (cv5 - true) 0.0139
+   share of samples whose true accuracy lies within cv5 +- 1.96 * naive SE: 0.825
+10-fold: mean fold sd 0.0343; naive SE = fold sd / sqrt(10) averages 0.0108; actual sd of the 10-fold mean across samples 0.0157; actual sd of (cv10 - true) 0.0146
+   share of samples whose true accuracy lies within cv10 +- 1.96 * naive SE: 0.800
+split-only noise: sd of the 10 repeat means of 5-fold within one sample, averaged: 0.0065
+
+==============================================================================
+4. Target-encoding leakage (Adult, 'profile' = age|occupation|education|hours)
+==============================================================================
+train 34189 rows, test 14653 rows
+distinct profiles in train: 15631; rows whose profile appears once: 10979 (0.321 of rows); median rows per profile 1
+test rows whose profile never appears in train: 0.381
+ROC AUC, 5-fold stratified CV on train vs held-out test:
+  A. no profile feature                            CV AUC 0.9262 (fold sd 0.0033)  test AUC 0.9290  CV - test -0.0028
+  B. mean encoding fitted before the CV loop       CV AUC 0.9781 (fold sd 0.0006)  test AUC 0.8644  CV - test +0.1137
+  C. same encoder inside the Pipeline              CV AUC 0.8490 (fold sd 0.0035)  test AUC 0.8644  CV - test -0.0154
+  D. sklearn TargetEncoder inside the Pipeline     CV AUC 0.9262 (fold sd 0.0035)  test AUC 0.9295  CV - test -0.0033
+
+==============================================================================
+5. Group leakage: 300 subjects x 10 visits, truth = 1000 new subjects
+==============================================================================
+  seed 0: KFold 0.7817  GroupKFold 0.7200  StratifiedGroupKFold 0.7200  new subjects 0.7296   positive share 0.512
+  seed 1: KFold 0.7953  GroupKFold 0.7137  StratifiedGroupKFold 0.7277  new subjects 0.7354   positive share 0.476
+  seed 2: KFold 0.7840  GroupKFold 0.7393  StratifiedGroupKFold 0.7307  new subjects 0.7314   positive share 0.479
+  seed 3: KFold 0.8000  GroupKFold 0.7607  StratifiedGroupKFold 0.7573  new subjects 0.7321   positive share 0.519
+  seed 4: KFold 0.7943  GroupKFold 0.7280  StratifiedGroupKFold 0.7277  new subjects 0.7270   positive share 0.533
+  mean   : KFold 0.7911 (sd 0.0079)  GroupKFold 0.7323 (sd 0.0185)  StratifiedGroupKFold 0.7327 (sd 0.0143)  new subjects 0.7311 (sd 0.0031)
+
+==============================================================================
+6. Time leakage: Bike Sharing hourly counts (OpenML 42712), MAE in rentals/hour
+==============================================================================
+rows 17379 in time order; train = first 13903 rows, future hold-out = last 3476 rows
+hold-out starts at year=1 month=8
+  KFold(5, shuffle=True)             CV MAE   24.32   folds 24.6 23.6 24.5 24.3 24.6
+  KFold(5) = cv=5 for a regressor    CV MAE   41.49   folds 49.3 30.1 35.9 42.5 49.6
+  TimeSeriesSplit(5)                 CV MAE   49.66   folds 66.0 30.4 41.8 59.6 50.4
+  TimeSeriesSplit(5, gap=48)         CV MAE   49.62   folds 65.5 30.1 41.5 60.7 50.3
+  future hold-out (truth)            MAE   44.06
+  mean count in train 174.6, in hold-out 248.8
+
+==============================================================================
+7. Nested vs non-nested CV: breast cancer, 398/171 splits, decision-tree grid (40 configs)
+==============================================================================
+  seed  0: non-nested 0.9272  nested 0.9147  test 0.9123  best {'max_depth': 3, 'min_samples_leaf': 5}
+  seed  1: non-nested 0.9372  nested 0.9246  test 0.9298  best {'max_depth': 4, 'min_samples_leaf': 5}
+  seed  2: non-nested 0.9372  nested 0.9297  test 0.9415  best {'max_depth': 3, 'min_samples_leaf': 20}
+  seed  3: non-nested 0.9548  nested 0.9271  test 0.9298  best {'max_depth': 8, 'min_samples_leaf': 2}
+  seed  4: non-nested 0.9322  nested 0.9246  test 0.9532  best {'max_depth': 4, 'min_samples_leaf': 5}
+  seed  5: non-nested 0.9245  nested 0.9094  test 0.9649  best {'max_depth': 5, 'min_samples_leaf': 5}
+  seed  6: non-nested 0.9272  nested 0.9221  test 0.9532  best {'max_depth': 4, 'min_samples_leaf': 1}
+  seed  7: non-nested 0.9372  nested 0.9221  test 0.9474  best {'max_depth': 6, 'min_samples_leaf': 5}
+  seed  8: non-nested 0.9446  nested 0.9323  test 0.9123  best {'max_depth': 2, 'min_samples_leaf': 10}
+  seed  9: non-nested 0.9145  nested 0.9320  test 0.9064  best {'max_depth': 4, 'min_samples_leaf': 5}
+  seed 10: non-nested 0.9523  nested 0.9472  test 0.9415  best {'max_depth': 4, 'min_samples_leaf': 1}
+  seed 11: non-nested 0.9320  nested 0.9270  test 0.9123  best {'max_depth': 3, 'min_samples_leaf': 5}
+  seed 12: non-nested 0.9497  nested 0.9497  test 0.8947  best {'max_depth': 2, 'min_samples_leaf': 5}
+  seed 13: non-nested 0.9547  nested 0.9371  test 0.9006  best {'max_depth': 3, 'min_samples_leaf': 5}
+  seed 14: non-nested 0.9372  nested 0.9296  test 0.9532  best {'max_depth': 2, 'min_samples_leaf': 1}
+  seed 15: non-nested 0.9371  nested 0.9145  test 0.9357  best {'max_depth': 5, 'min_samples_leaf': 2}
+  seed 16: non-nested 0.9347  nested 0.9196  test 0.9357  best {'max_depth': 3, 'min_samples_leaf': 5}
+  seed 17: non-nested 0.9171  nested 0.9070  test 0.9532  best {'max_depth': 2, 'min_samples_leaf': 1}
+  seed 18: non-nested 0.9422  nested 0.9372  test 0.8947  best {'max_depth': 5, 'min_samples_leaf': 10}
+  seed 19: non-nested 0.9372  nested 0.9172  test 0.9474  best {'max_depth': 4, 'min_samples_leaf': 2}
+  mean non-nested  0.9365 (sd 0.0113)
+  mean nested      0.9262 (sd 0.0113)
+  mean test        0.9310 (sd 0.0219)
+  mean (non-nested - test) +0.0055; mean (nested - test) -0.0048
+  mean (non-nested - nested) +0.0103; non-nested > nested in 19/20 splits
+
+==============================================================================
+8. cross_val_score vs cross_validate vs cross_val_predict (breast cancer train 398 rows)
+==============================================================================
+  cross_val_score accuracy per fold [0.9125, 0.875, 0.9625, 0.9494, 0.9494] mean 0.9297
+  cross_validate keys: ['fit_time', 'score_time', 'test_accuracy', 'test_roc_auc', 'train_accuracy', 'train_roc_auc']
+    test_accuracy mean 0.9297, train_accuracy mean 0.9918, test_roc_auc mean 0.9158
+  cross_val_predict pooled accuracy 0.9296 (mean of fold accuracies 0.9297)
+  pooled AUC from cross_val_predict probabilities 0.9118 vs mean of per-fold AUC 0.9158
+
+total runtime 164 s

@@ -1,0 +1,83 @@
+python 3.13.14 | scikit-learn 1.9.1 | numpy 2.5.5
+
+==============================================================================
+PART 1  Unique-row share of a bootstrap, n = 398, 500 draws
+==============================================================================
+RandomState(0): mean unique share = 0.6326; OOB share = 0.3674
+1 - 1/e = 0.6321
+
+==============================================================================
+PART 2  Hand example: 3 trees, 6 rows (asserted)
+==============================================================================
+OOB rows per tree: {'T1': [5], 'T2': [2], 'T3': [1]}
+rows without any OOB tree: [3, 4, 6] - asserted OK
+
+==============================================================================
+PART 3  Share of rows with an OOB value vs number of trees (n=398, 300 forests)
+==============================================================================
+trees | simulated % | formula 1-0.632^B | exact 1-p_in^B | sd over forests
+    1 |       36.8 |       36.8 |       36.7 | 1.48
+    2 |       60.0 |       60.1 |       60.0 | 1.77
+    3 |       74.8 |       74.8 |       74.7 | 1.62
+    5 |       89.9 |       89.9 |       89.9 | 1.44
+   10 |       99.0 |       99.0 |       99.0 | 0.48
+   30 |      100.0 |      100.0 |      100.0 | 0.00
+
+==============================================================================
+PART 4  OOB vs 5-fold CV vs test, 10 seeds (split seed = forest seed = 0..9)
+==============================================================================
+procedure: stratified 70/30 split (random_state=s), RandomForestClassifier(n_estimators=B, random_state=s, oob_score=True);
+CV = cross_val_score(same forest, train rows, cv=5) (stratified, unshuffled); SD = population SD over the 10 seeds
+ 10 trees: OOB 0.9319 +/- 0.0094 | CV 0.9465 +/- 0.0082 | test 0.9538 +/- 0.0151 | OOB-test -0.022 | CV-test -0.007
+ 30 trees: OOB 0.9540 +/- 0.0095 | CV 0.9543 +/- 0.0060 | test 0.9585 +/- 0.0135 | OOB-test -0.004 | CV-test -0.004
+100 trees: OOB 0.9593 +/- 0.0062 | CV 0.9570 +/- 0.0041 | test 0.9579 +/- 0.0082 | OOB-test +0.001 | CV-test -0.001
+300 trees: OOB 0.9590 +/- 0.0050 | CV 0.9558 +/- 0.0030 | test 0.9579 +/- 0.0090 | OOB-test +0.001 | CV-test -0.002
+
+The post's '1 tree: OOB 33 points below test' uses the random-forest seed-42 numbers: 0.9123 - 0.5829 = 0.3294 (see random-forest/results.txt).
+
+==============================================================================
+SUMMARY  published vs reproduced
+==============================================================================
+mean unique share, 500 draws      | published    0.6326 | reproduced    0.6326 | exact
+1 - 1/e                           | published    0.6321 | reproduced    0.6321 | exact
+remaining OOB share               | published    0.3674 | reproduced    0.3674 | exact
+hand example (OOB rows, values)   | published  asserted | reproduced  asserted | exact
+rows with OOB value, 1 trees (%)  | published      36.6 | reproduced      36.8 | within noise
+rows with OOB value, 2 trees (%)  | published      60.0 | reproduced      60.0 | exact
+rows with OOB value, 3 trees (%)  | published      74.7 | reproduced      74.8 | within noise
+rows with OOB value, 5 trees (%)  | published      89.8 | reproduced      89.9 | within noise
+rows with OOB value, 10 trees (%) | published      99.0 | reproduced      99.0 | exact
+rows with OOB value, 30 trees (%) | published     100.0 | reproduced     100.0 | exact
+10 trees OOB mean                 | published    0.9319 | reproduced    0.9319 | exact
+10 trees OOB sd                   | published    0.0094 | reproduced    0.0094 | exact
+10 trees CV mean                  | published    0.9465 | reproduced    0.9465 | exact
+10 trees CV sd                    | published    0.0082 | reproduced    0.0082 | exact
+10 trees test mean                | published    0.9538 | reproduced    0.9538 | exact
+10 trees test sd                  | published    0.0151 | reproduced    0.0151 | exact
+10 trees OOB-test                 | published    -0.022 | reproduced    -0.022 | exact
+10 trees CV-test                  | published    -0.007 | reproduced    -0.007 | exact
+30 trees OOB mean                 | published    0.9540 | reproduced    0.9540 | exact
+30 trees OOB sd                   | published    0.0095 | reproduced    0.0095 | exact
+30 trees CV mean                  | published    0.9543 | reproduced    0.9543 | exact
+30 trees CV sd                    | published    0.0060 | reproduced    0.0060 | exact
+30 trees test mean                | published    0.9585 | reproduced    0.9585 | exact
+30 trees test sd                  | published    0.0135 | reproduced    0.0135 | exact
+30 trees OOB-test                 | published    -0.005 | reproduced    -0.004 | DIFFERS
+30 trees CV-test                  | published    -0.004 | reproduced    -0.004 | exact
+100 trees OOB mean                | published    0.9593 | reproduced    0.9593 | exact
+100 trees OOB sd                  | published    0.0062 | reproduced    0.0062 | exact
+100 trees CV mean                 | published    0.9570 | reproduced    0.9570 | exact
+100 trees CV sd                   | published    0.0041 | reproduced    0.0041 | exact
+100 trees test mean               | published    0.9579 | reproduced    0.9579 | exact
+100 trees test sd                 | published    0.0082 | reproduced    0.0082 | exact
+100 trees OOB-test                | published    +0.001 | reproduced    +0.001 | exact
+100 trees CV-test                 | published    -0.001 | reproduced    -0.001 | exact
+300 trees OOB mean                | published    0.9590 | reproduced    0.9590 | exact
+300 trees OOB sd                  | published    0.0050 | reproduced    0.0050 | exact
+300 trees CV mean                 | published    0.9558 | reproduced    0.9558 | exact
+300 trees CV sd                   | published    0.0030 | reproduced    0.0030 | exact
+300 trees test mean               | published    0.9579 | reproduced    0.9579 | exact
+300 trees test sd                 | published    0.0090 | reproduced    0.0090 | exact
+300 trees OOB-test                | published    +0.001 | reproduced    +0.001 | exact
+300 trees CV-test                 | published    -0.002 | reproduced    -0.002 | exact
+1 tree: test - OOB (points)       | published        33 | reproduced        33 | exact

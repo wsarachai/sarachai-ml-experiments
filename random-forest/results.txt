@@ -1,0 +1,161 @@
+python 3.13.14 | scikit-learn 1.9.1 | numpy 2.5.5
+
+==============================================================================
+PART 1  Hand-calculated toy forest (asserted)
+==============================================================================
+T1: x1 <= 2.5  G_L=0.0000 G_R=0.4444 G_split=0.2222 P(left)=0.0000 P(right)=0.6667
+T2: x2 <= 3.5  G_L=0.0000 G_R=0.0000 G_split=0.0000 P(left)=0.0000 P(right)=1.0000
+T3: x1 <= 4.5  G_L=0.4444 G_R=0.0000 G_split=0.2222 P(left)=0.3333 P(right)=1.0000
+Gini of the full toy data = 0.5000; Gini at T1's root (its bootstrap) = 0.4444; decrease at T1 = 0.2222
+forest average: [0.1111, 0.1111, 0.6667, 0.3333, 0.8889, 0.8889]
+correct per tree: {'T1': 5, 'T2': 6, 'T3': 5}
+OOB values: {1: 0.3333, 2: 0.0, 5: 0.6667}
+all hand-calculated values assert OK
+
+==============================================================================
+PART 2  Share of unique rows in a bootstrap of n = 398, 500 draws
+==============================================================================
+theory 1-(1-1/n)^n = 0.6326   limit 1-1/e = 0.6321
+default_rng(0): mean=0.6327 min=0.5829 max=0.6809 sd=0.0156
+default_rng(42): mean=0.6330 min=0.5653 max=0.6734 sd=0.0164
+sd of the 500-draw mean over 50 repetitions = 0.0007
+per-draw sd of the unique share ~= 0.0157; published min/max are 2.8 and 3.2 sd from the mean
+
+==============================================================================
+PART 3  10 re-splits (split seed = model seed = 0..9)
+==============================================================================
+seed 0: tree=0.9064 forest300=0.9532
+seed 1: tree=0.9415 forest300=0.9591
+seed 2: tree=0.9357 forest300=0.9649
+seed 3: tree=0.9298 forest300=0.9708
+seed 4: tree=0.9415 forest300=0.9474
+seed 5: tree=0.9415 forest300=0.9708
+seed 6: tree=0.9649 forest300=0.9532
+seed 7: tree=0.9532 forest300=0.9649
+seed 8: tree=0.8947 forest300=0.9474
+seed 9: tree=0.9123 forest300=0.9474
+single tree: mean=0.9322 sd(ddof=0)=0.0206 sd(ddof=1)=0.0217 min=0.8947 max=0.9649
+forest 300: mean=0.9579 sd(ddof=0)=0.0090 sd(ddof=1)=0.0095 min=0.9474 max=0.9708
+
+seed-42 split: train 398 rows, test 171 rows
+
+==============================================================================
+PART 4  Seed-42 single tree
+==============================================================================
+depth=6 leaves=16 train=1.0000 test=0.9181
+
+==============================================================================
+PART 5  Seed-42 forest, 1..300 trees (oob_score=True, random_state=42)
+==============================================================================
+trees | train | test | OOB
+    1 | 0.9774 | 0.9123 | 0.5829
+    3 | 0.9874 | 0.9240 | 0.8065
+    5 | 0.9899 | 0.9357 | 0.9070
+   10 | 1.0000 | 0.9298 | 0.9497
+   30 | 0.9975 | 0.9357 | 0.9472
+  100 | 1.0000 | 0.9357 | 0.9573
+  300 | 1.0000 | 0.9415 | 0.9673
+
+==============================================================================
+PART 6  max_features sweep, 300 trees, random_state=42
+==============================================================================
+max_features=    1: test=0.9474 OOB=0.9623
+max_features= log2: test=0.9357 OOB=0.9623
+max_features= sqrt: test=0.9415 OOB=0.9673
+max_features=   10: test=0.9357 OOB=0.9698
+max_features= None: test=0.9415 OOB=0.9623
+
+==============================================================================
+PART 7  MDI vs permutation importance with two pure-noise columns
+==============================================================================
+procedure: append integers(0,1000) and integers(0,2) columns (default_rng(seed)),
+300-tree forest random_state=42, permutation importance on the test rows, 10 repeats.
+The post does not give the seed; 20 seeds are shown as a distribution.
+  seed  0: MDI(1000-level)=0.00223 MDI(2-level)=0.00041 perm=-0.0053 / -0.0029
+  seed  1: MDI(1000-level)=0.00450 MDI(2-level)=0.00058 perm=+0.0000 / +0.0023
+  seed  2: MDI(1000-level)=0.00347 MDI(2-level)=0.00052 perm=+0.0012 / +0.0000
+  seed  3: MDI(1000-level)=0.00246 MDI(2-level)=0.00048 perm=+0.0000 / +0.0000
+  seed  4: MDI(1000-level)=0.00485 MDI(2-level)=0.00046 perm=+0.0000 / +0.0000
+  seed  5: MDI(1000-level)=0.00314 MDI(2-level)=0.00068 perm=-0.0018 / +0.0000
+  seed  6: MDI(1000-level)=0.00353 MDI(2-level)=0.00092 perm=-0.0029 / -0.0035
+  seed  7: MDI(1000-level)=0.00235 MDI(2-level)=0.00049 perm=+0.0000 / +0.0000
+  seed  8: MDI(1000-level)=0.00384 MDI(2-level)=0.00045 perm=+0.0012 / +0.0000
+  seed  9: MDI(1000-level)=0.00256 MDI(2-level)=0.00046 perm=+0.0000 / +0.0000
+  seed 10: MDI(1000-level)=0.00278 MDI(2-level)=0.00074 perm=+0.0000 / +0.0000
+  seed 11: MDI(1000-level)=0.00242 MDI(2-level)=0.00049 perm=+0.0000 / +0.0000
+  seed 12: MDI(1000-level)=0.00266 MDI(2-level)=0.00069 perm=+0.0000 / +0.0000
+  seed 13: MDI(1000-level)=0.00327 MDI(2-level)=0.00054 perm=+0.0000 / +0.0000
+  seed 14: MDI(1000-level)=0.00227 MDI(2-level)=0.00063 perm=+0.0000 / +0.0000
+  seed 15: MDI(1000-level)=0.00210 MDI(2-level)=0.00066 perm=+0.0000 / +0.0000
+  seed 16: MDI(1000-level)=0.00728 MDI(2-level)=0.00046 perm=+0.0000 / +0.0000
+  seed 17: MDI(1000-level)=0.00201 MDI(2-level)=0.00035 perm=+0.0000 / +0.0000
+  seed 18: MDI(1000-level)=0.00256 MDI(2-level)=0.00044 perm=+0.0000 / +0.0000
+  seed 19: MDI(1000-level)=0.00260 MDI(2-level)=0.00040 perm=+0.0000 / +0.0000
+MDI 1000-level: median 0.00263 range 0.00201-0.00728
+MDI 2-level   : median 0.00049 range 0.00035-0.00092
+permutation   : range -0.0053 .. +0.0023
+1000-level MDI > 2-level MDI in 20/20 seeds
+
+==============================================================================
+PART 8  Defaults, scikit-learn 1.9.1
+==============================================================================
+RandomForestClassifier: {'n_estimators': 100, 'max_features': 'sqrt', 'bootstrap': True, 'oob_score': False, 'criterion': 'gini', 'min_samples_leaf': 1}
+RandomForestRegressor: {'n_estimators': 100, 'max_features': 1.0, 'bootstrap': True, 'oob_score': False, 'criterion': 'squared_error', 'min_samples_leaf': 1}
+
+==============================================================================
+SUMMARY  published vs reproduced
+==============================================================================
+T1 root Gini (post: 0.5)                | published       0.5000 | reproduced       0.4444 | DIFFERS
+T1 impurity decrease (post: 0.2778)     | published       0.2778 | reproduced       0.2222 | DIFFERS
+toy example (all hand values)           | published     asserted | reproduced     asserted | exact
+theory 1-(1-1/n)^n, n=398               | published       0.6326 | reproduced       0.6326 | exact
+bootstrap mean unique share (500 draws) | published       0.6326 | reproduced       0.6330 | within noise
+bootstrap min unique share              | published       0.5879 | reproduced       0.5653 | within noise
+bootstrap max unique share              | published       0.6834 | reproduced       0.6734 | within noise
+single tree 10 seeds mean               | published       0.9322 | reproduced       0.9322 | exact
+single tree 10 seeds SD (population)    | published       0.0206 | reproduced       0.0206 | exact
+single tree 10 seeds min                | published       0.8947 | reproduced       0.8947 | exact
+single tree 10 seeds max                | published       0.9649 | reproduced       0.9649 | exact
+forest 300 10 seeds mean                | published       0.9579 | reproduced       0.9579 | exact
+forest 300 10 seeds SD (population)     | published       0.0090 | reproduced       0.0090 | exact
+forest 300 10 seeds min                 | published       0.9474 | reproduced       0.9474 | exact
+forest 300 10 seeds max                 | published       0.9708 | reproduced       0.9708 | exact
+seed-42 tree depth                      | published            6 | reproduced            6 | exact
+seed-42 tree leaves                     | published           16 | reproduced           16 | exact
+seed-42 tree train acc                  | published       1.0000 | reproduced       1.0000 | exact
+seed-42 tree test acc                   | published       0.9181 | reproduced       0.9181 | exact
+forest 1 trees train                    | published       0.9774 | reproduced       0.9774 | exact
+forest 1 trees test                     | published       0.9123 | reproduced       0.9123 | exact
+forest 1 trees OOB                      | published       0.5829 | reproduced       0.5829 | exact
+forest 3 trees train                    | published       0.9874 | reproduced       0.9874 | exact
+forest 3 trees test                     | published       0.9240 | reproduced       0.9240 | exact
+forest 3 trees OOB                      | published       0.8065 | reproduced       0.8065 | exact
+forest 5 trees train                    | published       0.9899 | reproduced       0.9899 | exact
+forest 5 trees test                     | published       0.9357 | reproduced       0.9357 | exact
+forest 5 trees OOB                      | published       0.9070 | reproduced       0.9070 | exact
+forest 10 trees train                   | published       1.0000 | reproduced       1.0000 | exact
+forest 10 trees test                    | published       0.9298 | reproduced       0.9298 | exact
+forest 10 trees OOB                     | published       0.9497 | reproduced       0.9497 | exact
+forest 30 trees train                   | published       0.9975 | reproduced       0.9975 | exact
+forest 30 trees test                    | published       0.9357 | reproduced       0.9357 | exact
+forest 30 trees OOB                     | published       0.9472 | reproduced       0.9472 | exact
+forest 100 trees train                  | published       1.0000 | reproduced       1.0000 | exact
+forest 100 trees test                   | published       0.9357 | reproduced       0.9357 | exact
+forest 100 trees OOB                    | published       0.9573 | reproduced       0.9573 | exact
+forest 300 trees train                  | published       1.0000 | reproduced       1.0000 | exact
+forest 300 trees test                   | published       0.9415 | reproduced       0.9415 | exact
+forest 300 trees OOB                    | published       0.9673 | reproduced       0.9673 | exact
+max_features=1 test                     | published       0.9474 | reproduced       0.9474 | exact
+max_features=1 OOB                      | published       0.9623 | reproduced       0.9623 | exact
+max_features=log2 test                  | published       0.9357 | reproduced       0.9357 | exact
+max_features=log2 OOB                   | published       0.9623 | reproduced       0.9623 | exact
+max_features=sqrt test                  | published       0.9415 | reproduced       0.9415 | exact
+max_features=sqrt OOB                   | published       0.9673 | reproduced       0.9673 | exact
+max_features=10 test                    | published       0.9357 | reproduced       0.9357 | exact
+max_features=10 OOB                     | published       0.9698 | reproduced       0.9698 | exact
+max_features=None test                  | published       0.9415 | reproduced       0.9415 | exact
+max_features=None OOB                   | published       0.9623 | reproduced       0.9623 | exact
+MDI 1000-level noise column (seed 0)    | published      0.00449 | reproduced      0.00223 | within noise
+MDI 2-level noise column (seed 0)       | published      0.00055 | reproduced      0.00041 | within noise
+permutation importance both noise cols  | published       0.0000 | reproduced       0.0053 | DIFFERS
+default parameter table                 | published as published | reproduced as published | exact

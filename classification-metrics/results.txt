@@ -1,0 +1,139 @@
+python 3.13.14 | scikit-learn 1.9.1 | xgboost 3.4.1 | numpy 2.5.5 | pandas 3.1.1
+seed 42
+==============================================================================
+1. Toy table: 12 rows, scores and labels
+==============================================================================
+rows=12  positives P=4  negatives N=8
+  row  1  score=0.95  y=1
+  row  2  score=0.85  y=1
+  row  3  score=0.80  y=0
+  row  4  score=0.70  y=1
+  row  5  score=0.60  y=0
+  row  6  score=0.55  y=0
+  row  7  score=0.45  y=1
+  row  8  score=0.40  y=0
+  row  9  score=0.30  y=0
+  row 10  score=0.20  y=0
+  row 11  score=0.15  y=0
+  row 12  score=0.05  y=0
+majority baseline accuracy = 8/12 = 0.6667
+
+Confusion matrix and metrics at two thresholds (predict 1 if score >= t):
+  t=0.75: TP=2 FP=1 FN=2 TN=7 | acc=3/4=0.7500 precision=2/3=0.6667 recall=1/2=0.5000 F1=4/7=0.5714 F2=10/19=0.5263 FPR=1/8=0.1250
+           sklearn confusion_matrix = [[7, 1], [2, 2]]  (rows = true 0/1, cols = pred 0/1)
+  t=0.50: TP=3 FP=3 FN=1 TN=5 | acc=2/3=0.6667 precision=1/2=0.5000 recall=3/4=0.7500 F1=3/5=0.6000 F2=15/22=0.6818 FPR=3/8=0.3750
+           sklearn confusion_matrix = [[5, 3], [1, 3]]  (rows = true 0/1, cols = pred 0/1)
+
+ROC points, walking the threshold down one row at a time:
+  top  0 rows -> FPR=0 (0.000)  TPR=0 (0.000)
+  top  1 rows -> FPR=0 (0.000)  TPR=1/4 (0.250)
+  top  2 rows -> FPR=0 (0.000)  TPR=1/2 (0.500)
+  top  3 rows -> FPR=1/8 (0.125)  TPR=1/2 (0.500)
+  top  4 rows -> FPR=1/8 (0.125)  TPR=3/4 (0.750)
+  top  5 rows -> FPR=1/4 (0.250)  TPR=3/4 (0.750)
+  top  6 rows -> FPR=3/8 (0.375)  TPR=3/4 (0.750)
+  top  7 rows -> FPR=3/8 (0.375)  TPR=1 (1.000)
+  top  8 rows -> FPR=1/2 (0.500)  TPR=1 (1.000)
+  top  9 rows -> FPR=5/8 (0.625)  TPR=1 (1.000)
+  top 10 rows -> FPR=3/4 (0.750)  TPR=1 (1.000)
+  top 11 rows -> FPR=7/8 (0.875)  TPR=1 (1.000)
+  top 12 rows -> FPR=1 (1.000)  TPR=1 (1.000)
+ROC-AUC by trapezoids = 7/8 = 0.8750; sklearn roc_auc_score = 0.8750
+pairs formula: negatives below each positive = [8, 8, 7, 5], sum=28 of 4*8=32 pairs -> AUC = 0.8750
+AP: precision at each positive = ['1', '1', '3/4', '4/7'] -> AP = 93/112 = 0.8304; sklearn average_precision_score = 0.8304
+(trapezoidal area under the PR points = 0.8110, differs from AP by design)
+
+Expected cost with C_FP=1, C_FN=5 (cut after the top k rows):
+  top  0 (t=1.01): TP=0 FP=0 FN=4 -> cost = 0*1 + 4*5 = 20
+  top  1 (t=0.95): TP=1 FP=0 FN=3 -> cost = 0*1 + 3*5 = 15
+  top  2 (t=0.85): TP=2 FP=0 FN=2 -> cost = 0*1 + 2*5 = 10
+  top  3 (t=0.80): TP=2 FP=1 FN=2 -> cost = 1*1 + 2*5 = 11
+  top  4 (t=0.70): TP=3 FP=1 FN=1 -> cost = 1*1 + 1*5 = 6
+  top  5 (t=0.60): TP=3 FP=2 FN=1 -> cost = 2*1 + 1*5 = 7
+  top  6 (t=0.55): TP=3 FP=3 FN=1 -> cost = 3*1 + 1*5 = 8
+  top  7 (t=0.45): TP=4 FP=3 FN=0 -> cost = 3*1 + 0*5 = 3
+  top  8 (t=0.40): TP=4 FP=4 FN=0 -> cost = 4*1 + 0*5 = 4
+  top  9 (t=0.30): TP=4 FP=5 FN=0 -> cost = 5*1 + 0*5 = 5
+  top 10 (t=0.20): TP=4 FP=6 FN=0 -> cost = 6*1 + 0*5 = 6
+  top 11 (t=0.15): TP=4 FP=7 FN=0 -> cost = 7*1 + 0*5 = 7
+  top 12 (t=0.05): TP=4 FP=8 FN=0 -> cost = 8*1 + 0*5 = 8
+lowest cost: cut after top 7 rows (t=0.45), total cost 3 = 0.2500 per row
+Bayes threshold for calibrated probabilities: C_FP/(C_FP+C_FN) = 0.1667
+Brier score (mean of (p-y)^2) = 0.1696; log loss = 0.4998 (both match sklearn)
+
+Multiclass averaging on a 3-class toy confusion matrix:
+  class 0: support=55 precision=0.9091 recall=0.9091 F1=0.9091
+  class 1: support=20 precision=0.5882 recall=0.5000 F1=0.5405
+  class 2: support=10 precision=0.3846 recall=0.5000 F1=0.4348
+  macro F1=0.6281  weighted F1=0.7666  micro F1=0.7647 (= accuracy)
+  confusion matrix = [[50, 3, 2], [4, 10, 6], [1, 4, 5]]
+All toy-table numbers asserted against scikit-learn: OK
+
+==============================================================================
+2. Adult census income (OpenML adult v2)
+==============================================================================
+rows=48842 features=14 categorical=8 positives (>50K)=0.2393
+train=29304 (0.2393 pos)  validation=9769 (0.2392 pos)  test=9769 (0.2393 pos)
+
+2a. Test-set metrics at threshold 0.5 (baseline = majority class / prior probability)
+      model |       acc |   bal_acc | precision |    recall |        F1 |   ROC_AUC |        AP |     Brier |   logloss |      cost
+   baseline |    0.7607 |    0.5000 |    0.0000 |    0.0000 |    0.0000 |    0.5000 |    0.2393 |    0.1821 |    0.5503 |    1.1966
+    XGBoost |    0.8752 |    0.8017 |    0.7839 |    0.6608 |    0.7171 |    0.9275 |    0.8285 |    0.0884 |    0.2790 |    0.4495
+         RF |    0.8617 |    0.7801 |    0.7558 |    0.6236 |    0.6834 |    0.9101 |    0.7945 |    0.0972 |    0.3166 |    0.4986
+  AP of a random ranking = prevalence = 0.2393
+  xgb confusion matrix (test, t=0.5) [[TN, FP], [FN, TP]] = [[7005, 426], [793, 1545]]
+  rf confusion matrix (test, t=0.5) [[TN, FP], [FN, TP]] = [[6960, 471], [880, 1458]]
+  baseline confusion matrix = [[7431, 0], [2338, 0]]
+
+2b. Same model, same negatives, positives subsampled to 1/10 (test set, 20 random draws)
+  xgb: full test  prevalence=0.2393 ROC-AUC=0.9275 AP=0.8285 precision@0.5=0.7839 recall@0.5=0.6608
+  xgb: rare pos.  prevalence=0.0304 ROC-AUC=0.9310+-0.0074 AP=0.5271+-0.0311 precision@0.5=0.2706 recall@0.5=0.6788
+  rf: full test  prevalence=0.2393 ROC-AUC=0.9101 AP=0.7945 precision@0.5=0.7558 recall@0.5=0.6236
+  rf: rare pos.  prevalence=0.0304 ROC-AUC=0.9132+-0.0076 AP=0.4620+-0.0290 precision@0.5=0.2397 recall@0.5=0.6378
+
+2c. Threshold from costs (C_FP=1, C_FN=5); chosen on validation, reported on test
+  xgb: best threshold on validation = 0.15 (validation cost/row 0.2786)
+    test @ t=0.50 (default)                           cost/row=0.4495 precision=0.7839 recall=0.6608 acc=0.8752
+    test @ t=0.1667 (Bayes, assumes calibration)      cost/row=0.2850 precision=0.5665 recall=0.8995 acc=0.8112
+    test @ t=0.15 (tuned on validation)               cost/row=0.2855 precision=0.5539 recall=0.9076 acc=0.8029
+    (oracle: lowest test cost over the grid = 0.2855 at t=0.15 -- not selectable)
+  rf: best threshold on validation = 0.15 (validation cost/row 0.3082)
+    test @ t=0.50 (default)                           cost/row=0.4986 precision=0.7558 recall=0.6236 acc=0.8617
+    test @ t=0.1667 (Bayes, assumes calibration)      cost/row=0.3213 precision=0.5166 recall=0.8999 acc=0.7745
+    test @ t=0.15 (tuned on validation)               cost/row=0.3215 precision=0.5020 recall=0.9123 acc=0.7624
+    (oracle: lowest test cost over the grid = 0.3213 at t=0.17 -- not selectable)
+  baseline 'predict nobody' cost/row on test = 1.1966; 'predict everybody' = 0.7607
+  TunedThresholdClassifierCV(FrozenEstimator(xgb), cv='prefit', thresholds=grid) on validation: best_threshold_=0.1500 best_score_=-0.2786; test cost/row=0.2855
+  FixedThresholdClassifier(FrozenEstimator(xgb), threshold=best) gives identical test predictions: OK
+  TunedThresholdClassifierCV(xgb, cv=5) on train only (refit=True): best_threshold_=0.1300; test cost/row=0.2902
+
+2d. Calibration on test; calibrators fitted on validation with FrozenEstimator
+  model/method        |  Brier   | logloss  |  ECE10   | ROC-AUC  |   AP     | mean p   | cost@1/6
+  xgb  raw            | 0.0884  | 0.2790  | 0.0133  | 0.9275  | 0.8285  | 0.2348  | 0.2850
+  xgb  sigmoid        | 0.0909  | 0.2975  | 0.0276  | 0.9275  | 0.8285  | 0.2383  | 0.3097
+  xgb  isotonic       | 0.0884  | 0.2875  | 0.0102  | 0.9271  | 0.8201  | 0.2389  | 0.2880
+  rf   raw            | 0.0972  | 0.3166  | 0.0115  | 0.9101  | 0.7945  | 0.2414  | 0.3213
+  rf   sigmoid        | 0.0991  | 0.3218  | 0.0312  | 0.9101  | 0.7945  | 0.2362  | 0.3431
+  rf   isotonic       | 0.0974  | 0.3078  | 0.0104  | 0.9098  | 0.7845  | 0.2372  | 0.3270
+  test prevalence = 0.2393
+  xgb raw: share of test probabilities < 0.05 = 0.4859, > 0.95 = 0.0668
+  rf raw: share of test probabilities < 0.05 = 0.4204, > 0.95 = 0.0428
+  reliability xgb/raw: (0.02->0.03), (0.15->0.19), (0.25->0.26), (0.35->0.34), (0.44->0.41), (0.55->0.56), (0.65->0.62), (0.75->0.75), (0.84->0.81), (0.99->0.98)
+  reliability xgb/isotonic: (0.02->0.02), (0.16->0.17), (0.27->0.25), (0.36->0.31), (0.41->0.37), (0.53->0.56), (0.65->0.66), (0.79->0.80), (0.85->0.83), (0.99->0.99)
+  reliability rf/raw: (0.02->0.03), (0.15->0.15), (0.25->0.25), (0.35->0.33), (0.45->0.42), (0.55->0.51), (0.65->0.63), (0.75->0.73), (0.85->0.82), (0.97->0.97)
+  reliability rf/isotonic: (0.02->0.03), (0.14->0.14), (0.26->0.24), (0.37->0.36), (0.43->0.41), (0.54->0.57), (0.66->0.69), (0.75->0.77), (0.85->0.85), (0.97->0.98)
+
+2e. Class weighting and undersampling (test set; threshold 0.5 unless noted)
+  scale_pos_weight = negatives/positives in train = 3.1791
+  undersampled train: 14024 rows, positives 0.5000
+  variant      | prec@.5 | rec@.5 |  F1@.5  | ROC-AUC |   AP    |  Brier  | logloss | mean p  | t*(val) | cost@t* | prec@t* | rec@t*
+  xgb plain    | 0.7839  | 0.6608 | 0.7171  | 0.9275  | 0.8285  | 0.0884  | 0.2790  | 0.2348  | 0.15    | 0.2855  | 0.5539  | 0.9076
+  xgb spw      | 0.6236  | 0.8383 | 0.7152  | 0.9259  | 0.8271  | 0.1051  | 0.3215  | 0.3215  | 0.31    | 0.2932  | 0.5427  | 0.9080
+  xgb under    | 0.6012  | 0.8640 | 0.7090  | 0.9236  | 0.8166  | 0.1145  | 0.3514  | 0.3446  | 0.33    | 0.2907  | 0.5266  | 0.9230
+  rf plain     | 0.7558  | 0.6236 | 0.6834  | 0.9101  | 0.7945  | 0.0972  | 0.3166  | 0.2414  | 0.15    | 0.3215  | 0.5020  | 0.9123
+  rf balanced  | 0.6610  | 0.7374 | 0.6971  | 0.9100  | 0.7857  | 0.1050  | 0.3375  | 0.2984  | 0.28    | 0.3223  | 0.5281  | 0.8896
+  rf under     | 0.5768  | 0.8417 | 0.6845  | 0.9100  | 0.7832  | 0.1245  | 0.3837  | 0.3626  | 0.43    | 0.3221  | 0.5403  | 0.8807
+  test prevalence = 0.2393
+  xgb under, prior-corrected p/(p+(1-p)*3.1791): Brier=0.0915 logloss=0.2899 mean p=0.2427
+
+figures written: adult-roc-vs-pr.png, cost-vs-threshold.png, reliability.png, toy-roc-pr.png
