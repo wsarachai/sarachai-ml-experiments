@@ -1,0 +1,117 @@
+[covertype] seed 0 default  RandomForest {'accuracy': 0.8148, 'log_loss': 0.5199} fit 0.38s pred 46.2ms size 46.97MB trees 100
+[covertype] seed 0 default  HistGB       {'accuracy': 0.7155, 'log_loss': 3.4518} fit 16.04s pred 457.7ms size 2.49MB trees 100
+[covertype] seed 0 default  XGBoost      {'accuracy': 0.8026, 'log_loss': 0.496} fit 3.28s pred 73.7ms size 1.57MB trees 100
+[covertype] seed 0 default  LightGBM     {'accuracy': 0.8018, 'log_loss': 0.5079} fit 5.35s pred 308.6ms size 2.40MB trees 100
+[covertype] seed 0 default  CatBoost     {'accuracy': 0.8159, 'log_loss': 0.4575} fit 27.10s pred 37.9ms size 4.20MB trees 1000
+[covertype] seed 0 matched  RandomForest {'accuracy': 0.8163, 'log_loss': 0.4897} fit 2.90s pred 285.9ms size 141.16MB trees 300
+[covertype] seed 0 matched  HistGB       {'accuracy': 0.8031, 'log_loss': 0.6052} fit 13.34s pred 298.6ms size 2.21MB trees 86
+[covertype] seed 0 matched  XGBoost      {'accuracy': 0.792, 'log_loss': 0.5022} fit 12.87s pred 241.2ms size 5.19MB trees 380
+[covertype] seed 0 matched  LightGBM     {'accuracy': 0.7962, 'log_loss': 0.5054} fit 6.00s pred 196.1ms size 1.88MB trees 76
+[covertype] seed 0 matched  CatBoost     {'accuracy': 0.7901, 'log_loss': 0.5057} fit 9.33s pred 31.9ms size 1.41MB trees 500
+[covertype] seed 1 default  RandomForest {'accuracy': 0.8099, 'log_loss': 0.5166} fit 0.98s pred 107.4ms size 47.15MB trees 100
+[covertype] seed 1 default  HistGB       {'accuracy': 0.7369, 'log_loss': 2.5896} fit 14.79s pred 419.5ms size 2.49MB trees 100
+[covertype] seed 1 default  XGBoost      {'accuracy': 0.8079, 'log_loss': 0.482} fit 3.02s pred 67.4ms size 1.54MB trees 100
+[covertype] seed 1 default  LightGBM     {'accuracy': 0.8109, 'log_loss': 0.4887} fit 4.49s pred 280.8ms size 2.40MB trees 100
+[covertype] seed 1 default  CatBoost     {'accuracy': 0.8128, 'log_loss': 0.4557} fit 26.87s pred 39.7ms size 4.20MB trees 1000
+[covertype] seed 1 matched  RandomForest {'accuracy': 0.8117, 'log_loss': 0.4899} fit 2.72s pred 263.6ms size 141.32MB trees 300
+[covertype] seed 1 matched  HistGB       {'accuracy': 0.7618, 'log_loss': 1.3771} fit 2.34s pred 66.9ms size 1.32MB trees 51
+[covertype] seed 1 matched  XGBoost      {'accuracy': 0.8041, 'log_loss': 0.4848} fit 5.81s pred 121.3ms size 5.95MB trees 468
+[covertype] seed 1 matched  LightGBM     {'accuracy': 0.8096, 'log_loss': 0.4909} fit 0.95s pred 118.2ms size 2.23MB trees 90
+[covertype] seed 1 matched  CatBoost     {'accuracy': 0.7882, 'log_loss': 0.5021} fit 4.00s pred 9.5ms size 1.41MB trees 500
+[covertype] seed 2 default  RandomForest {'accuracy': 0.809, 'log_loss': 0.5277} fit 0.44s pred 57.4ms size 46.70MB trees 100
+[covertype] seed 2 default  HistGB       {'accuracy': 0.7282, 'log_loss': 3.1779} fit 2.26s pred 167.2ms size 2.49MB trees 100
+[covertype] seed 2 default  XGBoost      {'accuracy': 0.8007, 'log_loss': 0.4965} fit 0.98s pred 33.6ms size 1.52MB trees 100
+[covertype] seed 2 default  LightGBM     {'accuracy': 0.802, 'log_loss': 0.5023} fit 0.61s pred 152.6ms size 2.40MB trees 100
+[covertype] seed 2 default  CatBoost     {'accuracy': 0.8114, 'log_loss': 0.4606} fit 18.87s pred 36.1ms size 4.20MB trees 1000
+[covertype] seed 2 matched  RandomForest {'accuracy': 0.8124, 'log_loss': 0.4878} fit 2.74s pred 217.7ms size 139.43MB trees 300
+[covertype] seed 2 matched  HistGB       {'accuracy': 0.7588, 'log_loss': 1.519} fit 1.93s pred 77.1ms size 1.57MB trees 61
+[covertype] seed 2 matched  XGBoost      {'accuracy': 0.7974, 'log_loss': 0.4997} fit 5.43s pred 119.2ms size 5.60MB trees 423
+[covertype] seed 2 matched  LightGBM     {'accuracy': 0.8015, 'log_loss': 0.4988} fit 1.04s pred 106.1ms size 2.01MB trees 81
+[covertype] seed 2 matched  CatBoost     {'accuracy': 0.7869, 'log_loss': 0.5103} fit 4.28s pred 9.5ms size 1.41MB trees 500
+[covertype] seed 3 default  RandomForest {'accuracy': 0.8097, 'log_loss': 0.5072} fit 0.49s pred 58.1ms size 47.53MB trees 100
+[covertype] seed 3 default  HistGB       {'accuracy': 0.806, 'log_loss': 0.5028} fit 2.31s pred 137.7ms size 2.48MB trees 100
+[covertype] seed 3 default  XGBoost      {'accuracy': 0.8022, 'log_loss': 0.489} fit 1.03s pred 44.0ms size 1.56MB trees 100
+[covertype] seed 3 default  LightGBM     {'accuracy': 0.806, 'log_loss': 0.4982} fit 0.64s pred 147.1ms size 2.40MB trees 100
+[covertype] seed 3 default  CatBoost     {'accuracy': 0.8099, 'log_loss': 0.4637} fit 12.98s pred 15.6ms size 4.20MB trees 1000
+[covertype] seed 3 matched  RandomForest {'accuracy': 0.8104, 'log_loss': 0.4921} fit 1.53s pred 187.5ms size 142.79MB trees 300
+[covertype] seed 3 matched  HistGB       {'accuracy': 0.8133, 'log_loss': 0.5103} fit 4.36s pred 250.3ms size 3.36MB trees 133
+[covertype] seed 3 matched  XGBoost      {'accuracy': 0.7981, 'log_loss': 0.4905} fit 6.92s pred 155.5ms size 5.95MB trees 441
+[covertype] seed 3 matched  LightGBM     {'accuracy': 0.8026, 'log_loss': 0.4975} fit 1.20s pred 137.9ms size 2.00MB trees 81
+[covertype] seed 3 matched  CatBoost     {'accuracy': 0.7865, 'log_loss': 0.5107} fit 5.88s pred 12.7ms size 1.41MB trees 500
+[covertype] seed 4 default  RandomForest {'accuracy': 0.8105, 'log_loss': 0.5072} fit 0.65s pred 81.5ms size 47.31MB trees 100
+[covertype] seed 4 default  HistGB       {'accuracy': 0.7229, 'log_loss': 3.1154} fit 8.97s pred 430.9ms size 2.48MB trees 100
+[covertype] seed 4 default  XGBoost      {'accuracy': 0.8022, 'log_loss': 0.481} fit 1.56s pred 51.2ms size 1.60MB trees 100
+[covertype] seed 4 default  LightGBM     {'accuracy': 0.8013, 'log_loss': 0.4862} fit 0.79s pred 196.7ms size 2.40MB trees 100
+[covertype] seed 4 default  CatBoost     {'accuracy': 0.8055, 'log_loss': 0.4605} fit 16.62s pred 18.0ms size 4.20MB trees 1000
+[covertype] seed 4 matched  RandomForest {'accuracy': 0.8119, 'log_loss': 0.4843} fit 1.88s pred 200.0ms size 142.07MB trees 300
+[covertype] seed 4 matched  HistGB       {'accuracy': 0.7642, 'log_loss': 1.3581} fit 2.69s pred 127.1ms size 1.88MB trees 73
+[covertype] seed 4 matched  XGBoost      {'accuracy': 0.8001, 'log_loss': 0.4859} fit 6.76s pred 170.0ms size 6.11MB trees 456
+[covertype] seed 4 matched  LightGBM     {'accuracy': 0.8035, 'log_loss': 0.4869} fit 1.16s pred 139.4ms size 2.15MB trees 87
+[covertype] seed 4 matched  CatBoost     {'accuracy': 0.7817, 'log_loss': 0.508} fit 5.17s pred 10.9ms size 1.41MB trees 500
+[covertype] done in 323 s
+[scaling] n=  10000 RandomForest acc 0.8083 fit 0.60s [0.6, 0.55, 0.91] pred 73.7ms size 47.47MB
+[scaling] n=  10000 HistGB       acc 0.7266 fit 9.00s [9.0, 9.77, 2.47] pred 332.7ms size 2.57MB
+[scaling] n=  10000 XGBoost      acc 0.7718 fit 2.47s [2.15, 2.47, 2.52] pred 60.0ms size 1.19MB
+[scaling] n=  10000 LightGBM     acc 0.8055 fit 3.96s [3.96, 3.87, 4.49] pred 301.5ms size 2.48MB
+[scaling] n=  10000 CatBoost     acc 0.7394 fit 1.83s [1.83, 1.85, 1.78] pred 17.2ms size 0.22MB
+[scaling] n= 100000 RandomForest acc 0.9117 fit 12.90s [12.9] pred 182.6ms size 330.21MB
+[scaling] n= 100000 HistGB       acc 0.8387 fit 26.84s [26.84] pred 303.0ms size 2.57MB
+[scaling] n= 100000 XGBoost      acc 0.7855 fit 7.68s [7.68] pred 57.5ms size 1.41MB
+[scaling] n= 100000 LightGBM     acc 0.8511 fit 6.34s [6.34] pred 253.2ms size 2.48MB
+[scaling] n= 100000 CatBoost     acc 0.7526 fit 6.83s [6.83] pred 17.2ms size 0.22MB
+[scaling] n= 531012 HistGB       acc 0.8546 fit 86.76s [86.76] pred 248.7ms size 2.57MB
+[scaling] n= 531012 XGBoost      acc 0.7870 fit 33.18s [33.18] pred 63.4ms size 1.54MB
+[scaling] n= 531012 LightGBM     acc 0.8586 fit 19.16s [19.16] pred 312.7ms size 2.50MB
+[scaling] n= 531012 CatBoost     acc 0.7542 fit 32.85s [32.85] pred 20.4ms size 0.22MB
+[scaling] done in 312 s
+[breast] seed 0 default  RandomForest {'roc_auc': 0.9732, 'log_loss': 0.4421, 'accuracy': 0.9386} fit 0.35s pred 103.7ms size 0.23MB trees 100
+[breast] seed 0 default  HistGB       {'roc_auc': 0.9821, 'log_loss': 0.2297, 'accuracy': 0.9561} fit 1.08s pred 52.3ms size 0.23MB trees 100
+[breast] seed 0 default  XGBoost      {'roc_auc': 0.9785, 'log_loss': 0.176, 'accuracy': 0.9561} fit 0.61s pred 12.8ms size 0.09MB trees 100
+[breast] seed 0 default  LightGBM     {'roc_auc': 0.9815, 'log_loss': 0.2789, 'accuracy': 0.9298} fit 0.50s pred 46.7ms size 0.24MB trees 100
+[breast] seed 0 default  CatBoost     {'roc_auc': 0.9818, 'log_loss': 0.1649, 'accuracy': 0.9474} fit 11.75s pred 18.5ms size 1.13MB trees 1000
+[breast] seed 0 matched  RandomForest {'roc_auc': 0.9772, 'log_loss': 0.1738, 'accuracy': 0.9474} fit 1.01s pred 220.0ms size 0.70MB trees 300
+[breast] seed 0 matched  HistGB       {'roc_auc': 0.9848, 'log_loss': 0.2978, 'accuracy': 0.9561} fit 1.62s pred 78.5ms size 0.31MB trees 163
+[breast] seed 0 matched  XGBoost      {'roc_auc': 0.9788, 'log_loss': 0.1727, 'accuracy': 0.9474} fit 1.18s pred 12.7ms size 0.11MB trees 55
+[breast] seed 0 matched  LightGBM     {'roc_auc': 0.9818, 'log_loss': 0.2866, 'accuracy': 0.9298} fit 0.71s pred 50.8ms size 0.27MB trees 109
+[breast] seed 0 matched  CatBoost     {'roc_auc': 0.9854, 'log_loss': 0.1803, 'accuracy': 0.9386} fit 1.20s pred 12.3ms size 0.08MB trees 103
+[breast] seed 1 default  RandomForest {'roc_auc': 0.9787, 'log_loss': 0.4024, 'accuracy': 0.9561} fit 0.34s pred 79.8ms size 0.26MB trees 100
+[breast] seed 1 default  HistGB       {'roc_auc': 0.9897, 'log_loss': 0.1277, 'accuracy': 0.9561} fit 0.95s pred 48.9ms size 0.23MB trees 100
+[breast] seed 1 default  XGBoost      {'roc_auc': 0.9964, 'log_loss': 0.0798, 'accuracy': 0.9649} fit 0.61s pred 13.1ms size 0.10MB trees 100
+[breast] seed 1 default  LightGBM     {'roc_auc': 0.9897, 'log_loss': 0.1603, 'accuracy': 0.9561} fit 0.38s pred 44.7ms size 0.22MB trees 100
+[breast] seed 1 default  CatBoost     {'roc_auc': 0.9904, 'log_loss': 0.1022, 'accuracy': 0.9649} fit 11.72s pred 19.9ms size 1.13MB trees 1000
+[breast] seed 1 matched  RandomForest {'roc_auc': 0.9769, 'log_loss': 0.4024, 'accuracy': 0.9561} fit 1.00s pred 207.0ms size 0.76MB trees 300
+[breast] seed 1 matched  HistGB       {'roc_auc': 0.9911, 'log_loss': 0.1418, 'accuracy': 0.9737} fit 1.33s pred 68.1ms size 0.29MB trees 138
+[breast] seed 1 matched  XGBoost      {'roc_auc': 0.9931, 'log_loss': 0.0914, 'accuracy': 0.9649} fit 2.07s pred 15.6ms size 0.17MB trees 117
+[breast] seed 1 matched  LightGBM     {'roc_auc': 0.9871, 'log_loss': 0.1392, 'accuracy': 0.9561} fit 0.49s pred 31.8ms size 0.15MB trees 69
+[breast] seed 1 matched  CatBoost     {'roc_auc': 0.9907, 'log_loss': 0.1061, 'accuracy': 0.9737} fit 1.58s pred 11.5ms size 0.11MB trees 156
+[breast] seed 2 default  RandomForest {'roc_auc': 0.9987, 'log_loss': 0.0872, 'accuracy': 0.9825} fit 0.32s pred 75.2ms size 0.28MB trees 100
+[breast] seed 2 default  HistGB       {'roc_auc': 0.9931, 'log_loss': 0.1267, 'accuracy': 0.9649} fit 0.86s pred 51.3ms size 0.22MB trees 100
+[breast] seed 2 default  XGBoost      {'roc_auc': 0.997, 'log_loss': 0.075, 'accuracy': 0.9649} fit 0.63s pred 13.1ms size 0.10MB trees 100
+[breast] seed 2 default  LightGBM     {'roc_auc': 0.9927, 'log_loss': 0.137, 'accuracy': 0.9737} fit 0.38s pred 46.6ms size 0.22MB trees 100
+[breast] seed 2 default  CatBoost     {'roc_auc': 0.998, 'log_loss': 0.0713, 'accuracy': 0.9737} fit 11.90s pred 19.2ms size 1.13MB trees 1000
+[breast] seed 2 matched  RandomForest {'roc_auc': 0.9979, 'log_loss': 0.0885, 'accuracy': 0.9825} fit 0.99s pred 212.3ms size 0.83MB trees 300
+[breast] seed 2 matched  HistGB       {'roc_auc': 0.9934, 'log_loss': 0.1697, 'accuracy': 0.9649} fit 1.79s pred 112.2ms size 0.32MB trees 166
+[breast] seed 2 matched  XGBoost      {'roc_auc': 0.997, 'log_loss': 0.0754, 'accuracy': 0.9649} fit 4.88s pred 24.7ms size 0.41MB trees 441
+[breast] seed 2 matched  LightGBM     {'roc_auc': 0.9934, 'log_loss': 0.1862, 'accuracy': 0.9737} fit 0.66s pred 68.4ms size 0.32MB trees 159
+[breast] seed 2 matched  CatBoost     {'roc_auc': 0.9977, 'log_loss': 0.0784, 'accuracy': 0.9737} fit 2.08s pred 13.6ms size 0.16MB trees 230
+[breast] seed 3 default  RandomForest {'roc_auc': 0.9897, 'log_loss': 0.1177, 'accuracy': 0.9737} fit 0.35s pred 80.9ms size 0.25MB trees 100
+[breast] seed 3 default  HistGB       {'roc_auc': 0.9957, 'log_loss': 0.0943, 'accuracy': 0.9649} fit 0.96s pred 52.4ms size 0.22MB trees 100
+[breast] seed 3 default  XGBoost      {'roc_auc': 0.9904, 'log_loss': 0.1025, 'accuracy': 0.9737} fit 0.63s pred 13.3ms size 0.09MB trees 100
+[breast] seed 3 default  LightGBM     {'roc_auc': 0.9944, 'log_loss': 0.1331, 'accuracy': 0.9649} fit 0.38s pred 46.8ms size 0.22MB trees 100
+[breast] seed 3 default  CatBoost     {'roc_auc': 0.9904, 'log_loss': 0.0916, 'accuracy': 0.9737} fit 11.63s pred 25.9ms size 1.13MB trees 1000
+[breast] seed 3 matched  RandomForest {'roc_auc': 0.9874, 'log_loss': 0.1273, 'accuracy': 0.9737} fit 0.98s pred 196.2ms size 0.76MB trees 300
+[breast] seed 3 matched  HistGB       {'roc_auc': 0.9964, 'log_loss': 0.1076, 'accuracy': 0.9737} fit 1.40s pred 80.9ms size 0.30MB trees 148
+[breast] seed 3 matched  XGBoost      {'roc_auc': 0.9878, 'log_loss': 0.1122, 'accuracy': 0.9737} fit 2.69s pred 10.9ms size 0.26MB trees 240
+[breast] seed 3 matched  LightGBM     {'roc_auc': 0.9914, 'log_loss': 0.1248, 'accuracy': 0.9649} fit 0.05s pred 18.8ms size 0.16MB trees 75
+[breast] seed 3 matched  CatBoost     {'roc_auc': 0.9904, 'log_loss': 0.101, 'accuracy': 0.9737} fit 1.73s pred 6.0ms size 0.30MB trees 453
+[breast] seed 4 default  RandomForest {'roc_auc': 0.9967, 'log_loss': 0.094, 'accuracy': 0.9561} fit 0.19s pred 50.3ms size 0.26MB trees 100
+[breast] seed 4 default  HistGB       {'roc_auc': 0.997, 'log_loss': 0.086, 'accuracy': 0.9561} fit 0.17s pred 21.0ms size 0.23MB trees 100
+[breast] seed 4 default  XGBoost      {'roc_auc': 0.995, 'log_loss': 0.0913, 'accuracy': 0.9649} fit 0.24s pred 5.6ms size 0.09MB trees 100
+[breast] seed 4 default  LightGBM     {'roc_auc': 0.9974, 'log_loss': 0.0738, 'accuracy': 0.9649} fit 0.04s pred 20.1ms size 0.22MB trees 100
+[breast] seed 4 default  CatBoost     {'roc_auc': 0.9983, 'log_loss': 0.0589, 'accuracy': 0.9649} fit 5.82s pred 6.2ms size 1.13MB trees 1000
+[breast] seed 4 matched  RandomForest {'roc_auc': 0.997, 'log_loss': 0.0938, 'accuracy': 0.9561} fit 0.50s pred 91.4ms size 0.80MB trees 300
+[breast] seed 4 matched  HistGB       {'roc_auc': 0.997, 'log_loss': 0.0928, 'accuracy': 0.9561} fit 0.15s pred 17.5ms size 0.24MB trees 105
+[breast] seed 4 matched  XGBoost      {'roc_auc': 0.9957, 'log_loss': 0.0815, 'accuracy': 0.9649} fit 0.73s pred 7.3ms size 0.17MB trees 119
+[breast] seed 4 matched  LightGBM     {'roc_auc': 0.9977, 'log_loss': 0.0657, 'accuracy': 0.9649} fit 0.05s pred 14.4ms size 0.12MB trees 58
+[breast] seed 4 matched  CatBoost     {'roc_auc': 0.9983, 'log_loss': 0.0557, 'accuracy': 0.9737} fit 0.46s pred 4.6ms size 0.05MB trees 64
+[breast] done in 104 s

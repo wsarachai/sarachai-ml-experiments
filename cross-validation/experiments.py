@@ -147,7 +147,8 @@ def hand_example() -> dict:
         say()
         say(name)
         folds = []
-        for k, (tr, te) in enumerate(cv.split(X12, Y12, G12)):
+        needs_groups = isinstance(cv, (GroupKFold, StratifiedGroupKFold))
+        for k, (tr, te) in enumerate(cv.split(X12, Y12, G12 if needs_groups else None)):
             tr1, te1 = (tr + 1).tolist(), (te + 1).tolist()
             leaked = sorted(str(v) for v in set(G12[tr]) & set(G12[te]))
             say(
@@ -425,7 +426,7 @@ def target_encoding_leak(X: pd.DataFrame, y: np.ndarray) -> dict:
 
     # D. sklearn TargetEncoder (cross-fitted fit_transform) inside the pipeline.
     report("D. sklearn TargetEncoder inside the Pipeline",
-           build(("te", TargetEncoder(target_type="binary", random_state=0), ["profile"])), X_tr, X_te)
+           build(("te", TargetEncoder(target_type="binary", cv=StratifiedKFold(5, shuffle=True, random_state=0)), ["profile"])), X_tr, X_te)
     return results
 
 
@@ -508,6 +509,10 @@ def time_leak() -> dict:
         s = -cross_val_score(model, X_tr, y_tr, cv=cv, scoring="neg_mean_absolute_error", n_jobs=-1)
         res[name] = s.mean()
         say(f"  {name:<34s} CV MAE {s.mean():7.2f}   folds " + " ".join(f"{v:.1f}" for v in s))
+    sizes = [(len(tr), len(te)) for tr, te in TimeSeriesSplit(5).split(X_tr)]
+    first_train_end = sizes[0][0] - 1
+    say(f"  TimeSeriesSplit(5) (train, test) sizes: {sizes}; first training fold ends at "
+        f"year={int(df['year'].iloc[first_train_end])} month={int(df['month'].iloc[first_train_end])}")
     truth = mean_absolute_error(y_te, clone(model).fit(X_tr, y_tr).predict(X_te))
     res["future hold-out"] = truth
     say(f"  {'future hold-out (truth)':<34s} MAE {truth:7.2f}")
@@ -620,8 +625,8 @@ def figure_leakage(te: dict, grp: dict, tm: dict) -> None:
     ax = axes[2]
     keys = ["KFold(5, shuffle=True)", "KFold(5) = cv=5 for a regressor", "TimeSeriesSplit(5)",
             "TimeSeriesSplit(5, gap=48)", "future hold-out"]
-    labels = ["KFold\nshuffled", "KFold\n(cv=5)", "TimeSeries\nSplit", "TimeSeries\nSplit gap=48",
-              "truth:\nfuture 20%"]
+    labels = ["KFold\nshuffled", "KFold\n(cv=5)", "Time-\nSeries-\nSplit", "Time-\nSeries-\nSplit\ngap=48",
+              "truth:\nfuture\n20%"]
     vals = [tm[k] for k in keys]
     colors = [TEAL] * 4 + [GREY]
     ax.bar(range(5), vals, 0.6, color=colors)

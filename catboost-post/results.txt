@@ -1,0 +1,75 @@
+python 3.13.14 | catboost 1.2.10 | xgboost 3.4.1 | numpy 2.5.5
+
+==============================================================================
+PART 1  Greedy target encoding leaks on a pure-noise id column
+==============================================================================
+Inferred procedure: y = RandomState(0).randint(0, 2, 1000), id = row number,
+train_test_split(test_size=0.3, random_state=42). Found by searching 5,166
+generator/seed/split combinations for the published prior 0.4871 and test
+class-0 share 0.4567; 2 matched, this is the simpler one.
+prior p = mean(y_train) = 0.4871; test share of class 0 = 0.4567
+greedy TS + stump: train 1.0000 test 0.4567 AUC 0.5000
+CatBoost(300 it, depth 3) on raw id: train 0.5129 test 0.4567 AUC 0.5000
+
+==============================================================================
+PART 2  Greedy vs ordered target statistics, 6 rows (asserted)
+==============================================================================
+greedy TS: {'A': 0.6667, 'B': 0.5556, 'C': 0.8333}
+ordered TS by row: {1: 0.3333, 2: 0.8333, 3: 0.6667, 4: 0.6667, 5: 0.5556, 6: 0.6667}
+
+==============================================================================
+PART 3  Parameters resolved by catboost 1.2.10 (CPU)
+==============================================================================
+Model: the 300-iteration, depth-3 model of part 1 (700 training rows).
+  boosting_type        = Plain
+  grow_policy          = SymmetricTree
+  one_hot_max_size     = 2
+  max_ctr_complexity   = 4
+  l2_leaf_reg          = 3
+  bootstrap_type       = MVS
+  learning_rate        = 0.026684999465942383
+  random_strength      = 1
+  counter_calc_method  = SkipTest
+  subsample            = 0.800000011920929
+defaults on a plain fit: iterations=1000 depth=6
+Note: the automatic learning rate depends on the data size as well as on the
+number of iterations; with defaults on the part-1 data it is 0.008847.
+
+==============================================================================
+PART 4  CatBoost (raw category) vs XGBoost + one-hot, 3,000 rows, 3 seeds
+==============================================================================
+The post's generator, split and model settings are not recorded. Stand-in: see
+make_data(); 70/30 split; both libraries at their defaults (random seed = seed).
+seed 0: CatBoost acc 0.7478 AUC 0.8241 | XGBoost+one-hot acc 0.7144 AUC 0.7951
+seed 1: CatBoost acc 0.7500 AUC 0.8348 | XGBoost+one-hot acc 0.7178 AUC 0.7971
+seed 2: CatBoost acc 0.7556 AUC 0.8299 | XGBoost+one-hot acc 0.7367 AUC 0.8129
+mean: CatBoost acc 0.7511 AUC 0.8296 | XGBoost acc 0.7230 AUC 0.8017
+gap (CatBoost - XGBoost): accuracy +0.0281, AUC +0.0279
+
+==============================================================================
+SUMMARY  published vs reproduced
+==============================================================================
+prior p (train mean)                     | published               0.4871 | reproduced               0.4871 | exact
+greedy TS train accuracy                 | published               1.0000 | reproduced               1.0000 | exact
+greedy TS test accuracy                  | published               0.4567 | reproduced               0.4567 | exact
+greedy TS test AUC                       | published               0.5000 | reproduced               0.5000 | exact
+CatBoost train accuracy                  | published               0.5129 | reproduced               0.5129 | exact
+CatBoost test accuracy                   | published               0.4567 | reproduced               0.4567 | exact
+CatBoost test AUC                        | published               0.5000 | reproduced               0.5000 | exact
+greedy/ordered TS hand tables            | published             asserted | reproduced             asserted | exact
+param boosting_type                      | published                Plain | reproduced                Plain | exact
+param grow_policy                        | published        SymmetricTree | reproduced        SymmetricTree | exact
+param one_hot_max_size                   | published                    2 | reproduced                    2 | exact
+param max_ctr_complexity                 | published                    4 | reproduced                    4 | exact
+param l2_leaf_reg                        | published                    3 | reproduced                    3 | exact
+param bootstrap_type                     | published                  MVS | reproduced                  MVS | exact
+param learning_rate                      | published 0.026684999465942383 | reproduced 0.026684999465942383 | exact
+param random_strength                    | published                    1 | reproduced                    1 | exact
+param counter_calc_method                | published             SkipTest | reproduced             SkipTest | exact
+default iterations                       | published                 1000 | reproduced                 1000 | exact
+default depth                            | published                    6 | reproduced                    6 | exact
+CatBoost accuracy                        | published               0.6811 | reproduced               0.7511 | not reproducible (generator unknown)
+CatBoost AUC                             | published               0.7430 | reproduced               0.8296 | not reproducible (generator unknown)
+XGBoost+one-hot accuracy                 | published               0.6619 | reproduced               0.7230 | not reproducible (generator unknown)
+XGBoost+one-hot AUC                      | published               0.7131 | reproduced               0.8017 | not reproducible (generator unknown)
+direction: CatBoost ahead on acc and AUC | published                  yes | reproduced                  yes | exact

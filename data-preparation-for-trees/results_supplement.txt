@@ -1,0 +1,35 @@
+1a. distinct training values per numeric column: float64 vs after the float32 cast
+  raw           age: 73/73, fnlwgt: 23538/23538, education-num: 16/16, capital-gain: 121/121, capital-loss: 98/98, hours-per-week: 93/93
+  standardised  age: 73/73, fnlwgt: 23538/23538, education-num: 16/16, capital-gain: 121/121, capital-loss: 98/98, hours-per-week: 93/93
+  log1p         age: 73/73, fnlwgt: 23538/23538, education-num: 16/16, capital-gain: 121/121, capital-loss: 98/98, hours-per-week: 93/93
+
+1b. RandomForest(random_state=0) fitted twice on identical raw data
+  max |p1 - p2| = 0.00e+00
+  without fnlwgt, raw vs standardised: max |dp| test = 4.90e-01, rows changed = 1608
+  without fnlwgt, raw vs x*2 (exact in float): max |dp| test = 3.33e-16
+  without fnlwgt, raw vs x - mean (centre only)   max |dp| test 3.50e-01, train 1.60e-01, rows changed 1345
+  without fnlwgt, raw vs x / sd (scale only)      max |dp| test 4.10e-01, train 1.90e-01, rows changed 1449
+  without fnlwgt, raw vs x + 1000                 max |dp| test 2.22e-16, train 2.22e-16, rows changed 0
+
+1c. LightGBM defaults: positive multiplication vs pure shift of the numeric columns
+  x * 2                    max |dp| test 0.00e+00, rows changed 0, AUC 0.9294 (raw 0.9294)
+  x + 1000                 max |dp| test 0.00e+00, rows changed 0, AUC 0.9294 (raw 0.9294)
+  x - mean (centre only)   max |dp| test 2.83e-01, rows changed 12211, AUC 0.9298 (raw 0.9294)
+
+2. HistGB native categorical, one depth-1 tree, y = 1 for A and C
+   2 rows per category: train accuracy 0.5000
+   5 rows per category: train accuracy 0.5000
+  10 rows per category: train accuracy 1.0000
+  20 rows per category: train accuracy 1.0000
+
+3. TargetEncoder with an explicit cv splitter (deterministic), Adult test AUC
+  RandomForest  AUC for cv seeds 0,1,2: [0.915, 0.9153, 0.9155]
+  HistGB        AUC for cv seeds 0,1,2: [0.9288, 0.9299, 0.9299]
+  XGBoost       AUC for cv seeds 0,1,2: [0.9276, 0.9271, 0.9268]
+  LightGBM      AUC for cv seeds 0,1,2: [0.9293, 0.9296, 0.9301]
+
+4. Mean vs median of the columns that get NaN injected (complete training data)
+  age             mean 38.704 (share of real rows equal to it 0.0000); median 37 (share of real rows equal to it 0.0262)
+  education-num   mean 10.078 (share of real rows equal to it 0.0000); median 10 (share of real rows equal to it 0.2207)
+  hours-per-week  mean 40.452 (share of real rows equal to it 0.0000); median 40 (share of real rows equal to it 0.4649)
+  capital-gain    mean 1065.125 (share of real rows equal to it 0.0000); median 0 (share of real rows equal to it 0.9183)

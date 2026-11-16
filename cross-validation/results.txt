@@ -58,7 +58,7 @@ Adult (OpenML 'adult' v2): 48842 rows, 14 features, positive (>50K) share 0.2393
 ==============================================================================
 pool rows 28842, evaluation rows 20000, repeats R=40, n=1000
 model: HistGradientBoostingClassifier(max_iter=100, early_stopping=False), accuracy
-(took 60.7 s)
+(took 433.6 s)
 true accuracy of the n=1000 model on 20000 unseen rows: mean 0.8357, sd across samples 0.0041
 
 estimator         mean     bias(est-true)  sd across samples  sd of (est-true)  corr(est,true)
@@ -104,6 +104,7 @@ hold-out starts at year=1 month=8
   KFold(5) = cv=5 for a regressor    CV MAE   41.49   folds 49.3 30.1 35.9 42.5 49.6
   TimeSeriesSplit(5)                 CV MAE   49.66   folds 66.0 30.4 41.8 59.6 50.4
   TimeSeriesSplit(5, gap=48)         CV MAE   49.62   folds 65.5 30.1 41.5 60.7 50.3
+  TimeSeriesSplit(5) (train, test) sizes: [(2318, 2317), (4635, 2317), (6952, 2317), (9269, 2317), (11586, 2317)]; first training fold ends at year=0 month=4
   future hold-out (truth)            MAE   44.06
   mean count in train 174.6, in hold-out 248.8
 
@@ -145,4 +146,4 @@ hold-out starts at year=1 month=8
   cross_val_predict pooled accuracy 0.9296 (mean of fold accuracies 0.9297)
   pooled AUC from cross_val_predict probabilities 0.9118 vs mean of per-fold AUC 0.9158
 
-total runtime 164 s
+total runtime 560 s

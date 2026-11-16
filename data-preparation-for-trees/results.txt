@@ -1,0 +1,171 @@
+python 3.13.14, scikit-learn 1.9.1, xgboost 3.4.1, lightgbm 4.7.0, catboost 1.2.10, numpy 2.5.5, pandas 3.1.1
+20 logical CPUs, 4 threads per model, timings = median of 3 fits
+
+==============================================================================
+1. SCALING
+==============================================================================
+
+1a. x1-only tree on the 6-row toy data (the deep tree of the decision-tree post)
+  raw           thresholds [2.5, 4.5, 3.5]  -> in hours [2.5, 4.5, 3.5]  leaf ids of rows 1-6 [1, 1, 4, 5, 6, 6]
+  standardised  thresholds [-0.5855, 0.5855, 0.0]  -> in hours [2.5, 4.5, 3.5]  leaf ids of rows 1-6 [1, 1, 4, 5, 6, 6]
+  log           thresholds [0.8959, 1.4979, 1.2425]  -> in hours [2.4495, 4.4721, 3.4641]  leaf ids of rows 1-6 [1, 1, 4, 5, 6, 6]
+  same partition of the 6 training rows in all three versions: True
+  new row with x1 = 2.47 hours:
+    raw           predicts 0
+    standardised  predicts 0
+    log           predicts 1
+  both features, raw: feature 1 thr 3.5000; log: feature 1 thr 1.2425 (exp = 3.4641)
+
+Adult (OpenML 'adult' v2): 48842 rows, 6 numeric + 8 categorical, positive rate 0.2393
+  numeric: ['age', 'fnlwgt', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week']
+  categorical (levels, missing cells): workclass (8, 2799), education (16, 0), marital-status (7, 0), occupation (14, 2809), relationship (6, 0), race (5, 0), sex (2, 0), native-country (41, 857)
+  stratified split 75/25 seed 42: train 36631, test 12211
+
+1b. Adult: numeric columns raw / standardised / log1p (categoricals fixed ordinal codes)
+    compare test predictions against the raw-feature model of the same library
+    test cells whose numeric value never occurs in training: {'age': 1, 'fnlwgt': 5428, 'education-num': 0, 'capital-gain': 3, 'capital-loss': 2, 'hours-per-week': 6}
+  DecisionTree  AUC raw 0.7521 | std: AUC 0.7523, max|dp| test 1.00e+00 train 0.00e+00, rows changed 13, labels changed 13 | log1p: AUC 0.7532, max|dp| test 1.00e+00 train 0.00e+00, rows changed 44, labels changed 44
+  RandomForest  AUC raw 0.9082 | std: AUC 0.9083, max|dp| test 1.30e-01 train 6.00e-02, rows changed 1435, labels changed 26 | log1p: AUC 0.9082, max|dp| test 2.20e-01 train 1.30e-01, rows changed 3941, labels changed 74
+  HistGB        AUC raw 0.9287 | std: AUC 0.9287, max|dp| test 0.00e+00 train 0.00e+00, rows changed 0, labels changed 0 | log1p: AUC 0.9287, max|dp| test 2.06e-02 train 0.00e+00, rows changed 1, labels changed 0
+  XGBoost       AUC raw 0.9287 | std: AUC 0.9287, max|dp| test 0.00e+00 train 0.00e+00, rows changed 0, labels changed 0 | log1p: AUC 0.9287, max|dp| test 0.00e+00 train 0.00e+00, rows changed 0, labels changed 0
+  LightGBM      AUC raw 0.9294 | std: AUC 0.9298, max|dp| test 2.83e-01 train 2.15e-01, rows changed 12211, labels changed 125 | log1p: AUC 0.9294, max|dp| test 3.92e-02 train 0.00e+00, rows changed 1, labels changed 0
+  CatBoost      AUC raw 0.9290 | std: AUC 0.9290, max|dp| test 0.00e+00 train 0.00e+00, rows changed 0, labels changed 0 | log1p: AUC 0.9290, max|dp| test 2.94e-01 train 0.00e+00, rows changed 2, labels changed 0
+
+1c. What scaling invariance does NOT cover
+  target transform, depth-1 tree: on y thr 3.5 leaves [11.0, 41.0]; on log(y) thr 3.5 leaves exp(.) [10.9696, 40.9919]
+  skewed y=[1.0, 2.0, 3.0, 4.0, 5.0, 100.0]: split on y at 5.5, on log(y) at 5.5
+  y = [x1 > x2], max_depth=2: x1,x2 only acc 0.8840 (4 leaves); + (x1 - x2) acc 1.0000 (2 leaves)
+  y = [x1 > x2], max_depth=4: x1,x2 only acc 0.9625 (16 leaves); + (x1 - x2) acc 1.0000 (2 leaves)
+  y = [x1 > x2], max_depth=8: x1,x2 only acc 0.9825 (42 leaves); + (x1 - x2) acc 1.0000 (2 leaves)
+  y = [x1 > x2], max_depth=None: x1,x2 only acc 0.9840 (43 leaves); + (x1 - x2) acc 1.0000 (2 leaves)
+
+==============================================================================
+2. MISSING VALUES
+==============================================================================
+
+2a. What each library does with NaN (tiny fit, feature x = [1, 2, NaN, 4, 5, NaN], y = [0, 0, 1, 0, 1, 1])
+  DecisionTreeClassifier           fits; P(y=1 | x=NaN) = 1.000
+  RandomForestClassifier           fits; P(y=1 | x=NaN) = 1.000
+  GradientBoostingClassifier       ERROR: Input X contains NaN.
+  HistGradientBoostingClassifier   fits; P(y=1 | x=NaN) = 0.702
+  XGBClassifier                    fits; P(y=1 | x=NaN) = 0.500
+  LGBMClassifier                   fits; P(y=1 | x=NaN) = 0.702
+  CatBoostClassifier               fits; P(y=1 | x=NaN) = 0.551; nan_mode = Min
+  DecisionTree trained without NaN, predict(NaN) -> 1 (docs: goes to the child with the most samples)
+  CatBoost with None in a cat_features column: Invalid type for cat_feature[non-default value idx=2,feature_idx=0]=nan : cat_features must be integer or string, real number values and NaN values should be co
+
+2b. Hand example: XGBoost learned default direction
+  F0 = 26.0, g = [16.0, 14.0, 15.0, -14.0, -16.0, -15.0], G_missing = -14.0, H_missing = 1.0
+  x < 1.5  non-missing GL= 16.0 HL=1.0 GR= -2.0 HR=4.0  gain NaN->left    1.500  NaN->right  153.600
+  x < 2.5  non-missing GL= 30.0 HL=2.0 GR=-16.0 HR=3.0  gain NaN->left   85.333  NaN->right  337.500
+  x < 4.0  non-missing GL= 45.0 HL=3.0 GR=-31.0 HR=2.0  gain NaN->left  360.375  NaN->right  675.000
+  x < 5.5  non-missing GL= 29.0 HL=4.0 GR=-15.0 HR=1.0  gain NaN->left  135.000  NaN->right  315.375
+  hand: best split x < 4.0, NaN goes right, gain 675.0
+  xgboost 3.4.1 exact: split hours < 4, missing -> node 2 (right), gain 1350, leaves -15 / 15, predictions [11.0, 11.0, 11.0, 41.0, 41.0, 41.0]
+
+2c. Adult: native NaN vs imputation, MCAR vs target-dependent missingness
+  inject NaN into ['age', 'education-num', 'hours-per-week', 'capital-gain'] of train AND test, each cell independently:
+    MCAR: p = 0.3;  target-dependent: p = 0.4 if y = 1 else 0.15
+    seeds [0, 1, 2] (numpy default_rng); categoricals: fixed ordinal codes, missing -> -1
+  no injected NaN  HistGB        AUC 0.9287 acc 0.8764
+  no injected NaN  XGBoost       AUC 0.9287 acc 0.8751
+  no injected NaN  LightGBM      AUC 0.9294 acc 0.8762
+  no injected NaN  RandomForest  AUC 0.9082 acc 0.8591
+
+  mechanism = mcar: mean missing rate in the 4 columns (train) 0.2999
+  model                   native NaN           mean impute         median impute    median + indicator   (mean AUC over seeds / mean acc)
+  HistGB               0.9164/0.8647         0.9161/0.8644         0.9160/0.8644         0.9163/0.8648
+  XGBoost              0.9153/0.8621         0.9150/0.8624         0.9152/0.8634         0.9155/0.8634
+  LightGBM             0.9169/0.8652         0.9161/0.8651         0.9167/0.8654         0.9166/0.8647
+  RandomForest         0.8958/0.8493         0.8961/0.8483         0.8906/0.8459         0.8948/0.8489
+    mcar HistGB        native NaN           AUC per seed [0.9168, 0.9169, 0.9155]
+    mcar HistGB        mean impute          AUC per seed [0.9165, 0.9166, 0.9153]
+    mcar HistGB        median impute        AUC per seed [0.9167, 0.9162, 0.9151]
+    mcar HistGB        median + indicator   AUC per seed [0.9167, 0.9168, 0.9156]
+    mcar XGBoost       native NaN           AUC per seed [0.9156, 0.9155, 0.9149]
+    mcar XGBoost       mean impute          AUC per seed [0.9148, 0.9149, 0.9151]
+    mcar XGBoost       median impute        AUC per seed [0.9157, 0.9156, 0.9145]
+    mcar XGBoost       median + indicator   AUC per seed [0.9153, 0.9164, 0.9149]
+    mcar LightGBM      native NaN           AUC per seed [0.9169, 0.9176, 0.9163]
+    mcar LightGBM      mean impute          AUC per seed [0.9164, 0.9173, 0.9147]
+    mcar LightGBM      median impute        AUC per seed [0.9175, 0.9167, 0.916]
+    mcar LightGBM      median + indicator   AUC per seed [0.9175, 0.917, 0.9153]
+    mcar RandomForest  native NaN           AUC per seed [0.8935, 0.8985, 0.8953]
+    mcar RandomForest  mean impute          AUC per seed [0.894, 0.8998, 0.8945]
+    mcar RandomForest  median impute        AUC per seed [0.8893, 0.8926, 0.8901]
+    mcar RandomForest  median + indicator   AUC per seed [0.8937, 0.8972, 0.8934]
+
+  mechanism = target: mean missing rate in the 4 columns (train) 0.2100
+  model                   native NaN           mean impute         median impute    median + indicator   (mean AUC over seeds / mean acc)
+  HistGB               0.9470/0.8947         0.9475/0.8961         0.9295/0.8765         0.9471/0.8963
+  XGBoost              0.9462/0.8936         0.9459/0.8951         0.9285/0.8745         0.9466/0.8953
+  LightGBM             0.9477/0.8967         0.9480/0.8966         0.9299/0.8771         0.9472/0.8956
+  RandomForest         0.9302/0.8837         0.9288/0.8815         0.9054/0.8609         0.9297/0.8811
+    target HistGB        native NaN           AUC per seed [0.9452, 0.948, 0.948]
+    target HistGB        mean impute          AUC per seed [0.9462, 0.9478, 0.9486]
+    target HistGB        median impute        AUC per seed [0.9285, 0.9296, 0.9303]
+    target HistGB        median + indicator   AUC per seed [0.9451, 0.9482, 0.948]
+    target XGBoost       native NaN           AUC per seed [0.9444, 0.9481, 0.9461]
+    target XGBoost       mean impute          AUC per seed [0.9437, 0.9473, 0.9467]
+    target XGBoost       median impute        AUC per seed [0.9275, 0.9287, 0.9291]
+    target XGBoost       median + indicator   AUC per seed [0.9451, 0.9479, 0.9467]
+    target LightGBM      native NaN           AUC per seed [0.9462, 0.9485, 0.9483]
+    target LightGBM      mean impute          AUC per seed [0.9468, 0.9485, 0.9486]
+    target LightGBM      median impute        AUC per seed [0.9294, 0.9301, 0.9301]
+    target LightGBM      median + indicator   AUC per seed [0.9457, 0.9483, 0.9475]
+    target RandomForest  native NaN           AUC per seed [0.9282, 0.933, 0.9294]
+    target RandomForest  mean impute          AUC per seed [0.9266, 0.9311, 0.9286]
+    target RandomForest  median impute        AUC per seed [0.9037, 0.9057, 0.9069]
+    target RandomForest  median + indicator   AUC per seed [0.9282, 0.9323, 0.9288]
+
+==============================================================================
+3. CATEGORICAL ENCODING
+==============================================================================
+
+3a. Hand example: 4 categories, y = 1 for A and C, 0 for B and D (2 rows each)
+  ordinal  code <= 0.5: G_split 0.3333; code <= 1.5: G_split 0.5000; code <= 2.5: G_split 0.3333
+  onehot   is_A: G_split 0.3333; is_B: G_split 0.3333; is_C: G_split 0.3333; is_D: G_split 0.3333
+  native   {B} vs rest: G_split 0.3333; {B,D} vs rest: G_split 0.0000; {A,B,D} vs rest: G_split 0.3333
+  sklearn full tree, ordinal codes: depth 3, leaves 4; one-hot: depth 2, leaves 3
+  xgboost enable_categorical, max_cat_to_onehot=1, depth 1: categories ['B', 'D'] go one way; train accuracy 1.0000
+  xgboost default max_cat_to_onehot (4 categories <= 4 -> one-vs-rest): split_condition [1, 3], train accuracy 1.0000
+  one depth-1 tree, native categorical: LightGBM train acc 1.0000, HistGB train acc 0.5000
+
+3b. Adult: one-hot / ordinal / target / native encodings
+  model         encoding   cols     acc     AUC  fit s (median)  all fits
+  RandomForest  one-hot     108  0.8574  0.9036           1.467  [1.379, 1.468, 1.467]
+  RandomForest  ordinal      14  0.8588  0.9076           1.124  [1.124, 1.097, 1.22]
+  RandomForest  target       14  0.8659  0.9158           1.366  [1.466, 1.366, 1.331]  (AUC varies across repeats!)
+  HistGB        one-hot     108  0.8769  0.9294           0.972  [1.112, 0.972, 0.916]
+  HistGB        ordinal      14  0.8764  0.9287           0.578  [0.493, 0.735, 0.578]
+  HistGB        target       14  0.8774  0.9297           0.566  [0.769, 0.566, 0.533]  (AUC varies across repeats!)
+  HistGB        native       14  0.8777  0.9295           0.584  [0.681, 0.584, 0.553]
+  XGBoost       one-hot     108  0.8755  0.9287           0.705  [0.705, 0.732, 0.705]
+  XGBoost       ordinal      14  0.8758  0.9280           0.463  [0.463, 0.457, 0.478]
+  XGBoost       target       14  0.8747  0.9271           0.558  [0.5, 0.608, 0.558]  (AUC varies across repeats!)
+  XGBoost       native       14  0.8712  0.9256           0.596  [0.625, 0.583, 0.596]
+  LightGBM      one-hot     108  0.8777  0.9296           0.306  [0.322, 0.306, 0.302]
+  LightGBM      ordinal      14  0.8762  0.9294           0.240  [0.246, 0.24, 0.238]
+  LightGBM      target       14  0.8775  0.9303           0.244  [0.244, 0.243, 0.249]  (AUC varies across repeats!)
+  LightGBM      native       14  0.8774  0.9297           0.208  [0.182, 0.208, 0.232]
+  CatBoost      one-hot     108  0.8780  0.9296           8.425  [8.425, 16.018, 6.163]
+  CatBoost      ordinal      14  0.8768  0.9296          15.015  [4.619, 15.015, 80.248]
+  CatBoost      native       14  0.8799  0.9309         345.349  [345.349, 660.06, 108.179]
+
+3c. TargetEncoder cross fitting: 1,000 rows, a unique id per row, random y
+  fit_transform (5-fold cross fitting) -> depth-1 tree train acc 0.5090; fit().transform() -> 1.0000; equal arrays? False
+
+3d. A category never seen in training appears at predict time
+  OneHotEncoder() default                  ERROR: Found unknown categories ['E'] in column 0 during transform
+  OneHotEncoder(handle_unknown='ignore')   no error, P(y=1) = 0.000
+  OrdinalEncoder() default                 ERROR: Found unknown categories ['E'] in column 0 during transform
+  TargetEncoder()                          no error, P(y=1) = 0.000
+  HistGB native                            no error, P(y=1) = 0.298
+  LightGBM native                          no error, P(y=1) = 0.500
+  XGBoost enable_categorical               ERROR: [11:23:46] C:\actions-runner\_work\xgboost\xgboost\src\data\../data/cat_container.h:29: Found a category not in the training set for the 0th (0-based)
+  CatBoost cat_features                    no error, P(y=1) = 0.541
+
+3e. Do the forests / XGBoost statements of the sibling posts still hold?
+  RandomForest with raw string categories                 ERROR: could not convert string to float: 'Private'
+  XGBoost pandas category, enable_categorical not set     fits
+  XGBoost defaults read from the trained model config     tree_method=auto, max_cat_to_onehot=4, max_cat_threshold=64

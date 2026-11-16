@@ -1,0 +1,311 @@
+scikit-learn 1.9.1, xgboost 3.4.1, lightgbm 4.7.0, catboost 1.2.10, numpy 2.5.5, pandas 3.1.1
+
+==============================================================================
+PART 1  MDI by hand on the 6-row toy data
+==============================================================================
+tree A (default, random_state=42): train accuracy 1.0000
+|--- x2 <= 3.50
+|   |--- class: 0
+|--- x2 >  3.50
+|   |--- class: 1
+  node x2 <= 3.5: n=6 G=0.5000 G_L=0.0000 G_R=0.0000 weighted decrease=0.5000
+  MDI by hand  : x1=0.0000 x2=1.0000
+  sklearn      : x1=0.0000 x2=1.0000
+  assert hand == sklearn feature_importances_: OK
+tree B (max_features=1, random_state=9): train accuracy 1.0000
+|--- x1 <= 2.50
+|   |--- class: 0
+|--- x1 >  2.50
+|   |--- x2 <= 2.50
+|   |   |--- class: 0
+|   |--- x2 >  2.50
+|   |   |--- class: 1
+  node x1 <= 2.5: n=6 G=0.5000 G_L=0.0000 G_R=0.3750 weighted decrease=0.2500
+  node x2 <= 2.5: n=4 G=0.3750 G_L=0.0000 G_R=0.0000 weighted decrease=0.2500
+  MDI by hand  : x1=0.5000 x2=0.5000
+  sklearn      : x1=0.5000 x2=0.5000
+  assert hand == sklearn feature_importances_: OK
+
+==============================================================================
+PART 2  Permutation importance on the toy trees
+==============================================================================
+tree A: exact expected accuracy drop over 720 orders: x1=0.0000 x2=0.5000
+tree A: sklearn permutation_importance (5000 repeats): x1=0.0000 x2=0.4983
+tree B: exact expected accuracy drop over 720 orders: x1=0.2778 x2=0.2778
+tree B: sklearn permutation_importance (5000 repeats): x1=0.2767 x2=0.2776
+tree B, x2 shuffled to [1, 1, 3, 4, 4, 5]: predictions [0, 0, 1, 1, 1, 1] accuracy 0.8333
+
+==============================================================================
+PART 3a  Shapley values by hand: two-feature regression tree (XGBoost, 1 tree)
+==============================================================================
+XGBoost seed 2 (colsample_bynode=0.5) grows:
+0:[f0<3] yes=1,no=2,missing=2,gain=0.75,cover=6
+	1:leaf=-0.5,cover=2
+	2:[f1<3] yes=3,no=4,missing=4,gain=0.75,cover=4
+		3:leaf=-0.5,cover=1
+		4:leaf=0.5,cover=3
+  v({}) path-dependent=0.5000 interventional=0.5000
+  v({0}) path-dependent=0.7500 interventional=0.6667
+  v({1}) path-dependent=0.6667 interventional=0.6667
+  v({0, 1}) path-dependent=1.0000 interventional=1.0000
+  path-dependent Shapley (brute force): [0.2917, 0.2083] sum=0.5000 = f(x) - E[f] = 0.5000
+  interventional Shapley (brute force): [0.25, 0.25] sum=0.5000 = f(x) - mean f(bg) = 0.5000
+  XGBoost pred_contribs              : [0.29170000553131104, 0.20829999446868896, 0.5] (last = bias)
+  assert path-dependent == XGBoost pred_contribs: OK
+  all 6 rows (path / interventional):
+    row 1 x=[1, 3] f=0  path=[-0.5833, 0.0833]  interv=[-0.5833, 0.0833]
+    row 2 x=[2, 1] f=0  path=[-0.25, -0.25]  interv=[-0.25, -0.25]
+    row 3 x=[3, 4] f=1  path=[0.2917, 0.2083]  interv=[0.25, 0.25]
+    row 4 x=[4, 1] f=0  path=[0.125, -0.625]  interv=[0.0833, -0.5833]
+    row 5 x=[5, 5] f=1  path=[0.2917, 0.2083]  interv=[0.25, 0.25]
+    row 6 x=[6, 4] f=1  path=[0.2917, 0.2083]  interv=[0.25, 0.25]
+
+==============================================================================
+PART 3b  Brute-force Shapley vs built-in TreeSHAP on small real models
+==============================================================================
+  XGBoost regressor  pred_contribs (cover=Cover): max |brute force - library| over 30 rows = 1.91e-07
+  XGBoost classifier: max |sum(contribs) - margin| = 7.15e-07 (log-odds scale)
+  XGBoost classifier pred_contribs (cover=Cover, i.e. sum of hessians): max |brute force - library| over 30 rows = 2.61e-07
+  LightGBM classifier: max |sum(contribs) - raw score| = 1.11e-15
+  LightGBM pred_contrib vs brute force with cover=count : max |brute force - library| over 30 rows = 8.88e-16
+  LightGBM pred_contrib vs brute force with cover=hessian: max |brute force - library| over 30 rows = 6.82e-02
+  -> LightGBM TreeSHAP uses data count as cover
+  CatBoost: max |sum(ShapValues) - RawFormulaVal| = 1.33e-15
+  CatBoost tree conversion (root = first split): max predict error 8.88e-16
+  CatBoost ShapValues (Regular) vs brute force, root = first split: max |brute force - library| over 30 rows = 5.17e-01
+  CatBoost tree conversion (root = last split): max predict error 8.88e-16
+  CatBoost ShapValues (Regular) vs brute force, root = last split: max |brute force - library| over 30 rows = 6.66e-16
+  CatBoost ShapValues + reference_data (100 rows) vs brute-force interventional: max err 1.33e-15 over 10 rows
+  same 10 rows: max |interventional - path-dependent| = 0.9558 log-odds
+
+Adult: 48842 rows, 14 features, positive rate 0.2393
+
+==============================================================================
+PART 4  Adult, random forest: MDI vs permutation importance, two noise canaries
+==============================================================================
+RandomForestClassifier(n_estimators=100, defaults, n_jobs=4); categoricals as codes.
+Split 75/25 stratified with random_state=seed; noise from default_rng(seed).
+Permutation: ROC AUC drop, 5 repeats, on 12,211 training rows and on the test rows.
+seed 42: AUC train 1.0000 test 0.9106 (37 s)
+                    mdi  perm_train  perm_test  perm_test_sd  rank_mdi  rank_perm_test
+fnlwgt          0.11542     0.01215   -0.00019       0.00036         1              14
+noise_1000      0.11380     0.01072   -0.00105       0.00047         2              16
+age             0.11331     0.04745    0.02766       0.00177         3               4
+capital-gain    0.11002     0.03102    0.05050       0.00157         4               1
+relationship    0.10721     0.02468    0.03248       0.00184         5               2
+education-num   0.08931     0.03847    0.03156       0.00147         6               3
+marital-status  0.07287     0.00631    0.02281       0.00068         7               5
+hours-per-week  0.06818     0.02587    0.01388       0.00106         8               6
+occupation      0.05567     0.01989    0.00741       0.00082         9               8
+capital-loss    0.03597     0.00517    0.00957       0.00056        10               7
+workclass       0.03357     0.00328    0.00225       0.00066        11               9
+education       0.03052     0.00243    0.00047       0.00022        12              11
+noise_2         0.01733     0.00092   -0.00075       0.00030        13              15
+native-country  0.01538     0.00039    0.00019       0.00016        14              13
+race            0.01140     0.00024    0.00040       0.00021        15              12
+sex             0.01004     0.00058    0.00149       0.00043        16              10
+seed 0: AUC train 1.0000 test 0.9103 (39 s)
+seed 1: AUC train 1.0000 test 0.9131 (35 s)
+seed 2: AUC train 1.0000 test 0.9122 (33 s)
+seed 3: AUC train 1.0000 test 0.9110 (34 s)
+
+Canaries across seeds (MDI, rank of 16 by MDI, perm train, perm test):
+  noise_1000 seed 42: MDI 0.11380 (rank  2) perm_train +0.01072 perm_test -0.00105
+  noise_1000 seed 0: MDI 0.11341 (rank  4) perm_train +0.01009 perm_test -0.00109
+  noise_1000 seed 1: MDI 0.11367 (rank  3) perm_train +0.01103 perm_test -0.00081
+  noise_1000 seed 2: MDI 0.11202 (rank  5) perm_train +0.01110 perm_test -0.00075
+  noise_1000 seed 3: MDI 0.11285 (rank  4) perm_train +0.01117 perm_test +0.00050
+  noise_2    seed 42: MDI 0.01733 (rank 13) perm_train +0.00092 perm_test -0.00075
+  noise_2    seed 0: MDI 0.01678 (rank 13) perm_train +0.00083 perm_test -0.00015
+  noise_2    seed 1: MDI 0.01709 (rank 13) perm_train +0.00089 perm_test +0.00022
+  noise_2    seed 2: MDI 0.01684 (rank 13) perm_train +0.00083 perm_test +0.00052
+  noise_2    seed 3: MDI 0.01696 (rank 13) perm_train +0.00086 perm_test +0.00011
+
+Rank range across seeds (min-max), MDI vs perm_test:
+  age             MDI rank  1- 5   perm rank  3- 4   MDI mean 0.1143
+  workclass       MDI rank 11-11   perm rank  9- 9   MDI mean 0.0332
+  fnlwgt          MDI rank  1- 3   perm rank 12-14   MDI mean 0.1150
+  education       MDI rank 12-12   perm rank 11-15   MDI mean 0.0305
+  education-num   MDI rank  6- 6   perm rank  3- 4   MDI mean 0.0894
+  marital-status  MDI rank  7- 9   perm rank  5- 6   MDI mean 0.0662
+  occupation      MDI rank  8- 9   perm rank  8- 8   MDI mean 0.0566
+  relationship    MDI rank  1- 5   perm rank  2- 2   MDI mean 0.1107
+  race            MDI rank 15-15   perm rank 12-15   MDI mean 0.0114
+  sex             MDI rank 16-16   perm rank 10-10   MDI mean 0.0095
+  capital-gain    MDI rank  2- 4   perm rank  1- 1   MDI mean 0.1139
+  capital-loss    MDI rank 10-10   perm rank  7- 7   MDI mean 0.0344
+  hours-per-week  MDI rank  7- 8   perm rank  5- 6   MDI mean 0.0688
+  native-country  MDI rank 14-14   perm rank 11-15   MDI mean 0.0157
+  noise_1000      MDI rank  2- 5   perm rank 13-16   MDI mean 0.1131
+  noise_2         MDI rank 13-13   perm rank 13-16   MDI mean 0.0170
+
+==============================================================================
+PART 5  Adult, one XGBoost model ranked six ways (+ LightGBM split vs gain)
+==============================================================================
+education -> education-num is one-to-one: True (16 levels)
+default importance_type: XGBClassifier=None, LGBMClassifier='split'
+XGBClassifier(n_estimators=300, max_depth=6, learning_rate=0.1, subsample=0.8,
+colsample_bytree=0.8, enable_categorical=True, n_jobs=4, random_state=seed)
+Permutation: ROC AUC drop on the test rows, 5 repeats. SHAP: pred_contribs on test rows.
+
+seed 42: test AUC 0.9251; max |sum(SHAP) - margin| = 1.05e-05
+XGBClassifier.feature_importances_ == normalised 'gain'
+XGBoost tree 0 root Cover = 5329.7 vs rows in the subsample ~29305 (classification Cover is a sum of hessians p(1-p))
+               weight   gain  cover total_gain total_cover permutation mean_abs_shap
+age              1319  6.474  375.6       8539   4.954e+05     0.03469        0.7013
+workclass         723  3.842  289.7       2778   2.094e+05    0.002203        0.1101
+fnlwgt           1615  2.813  333.8       4544   5.391e+05    0.001445         0.157
+education        1450   7.96  292.1  1.154e+04   4.236e+05     0.01682        0.4257
+education-num     163   22.2  320.5       3618   5.224e+04    0.001341        0.1087
+marital-status    441  46.41  452.6  2.047e+04   1.996e+05     0.03756        0.9389
+occupation       1496  8.351    308  1.249e+04   4.608e+05     0.01716        0.4921
+relationship      492  35.86  377.3  1.764e+04   1.856e+05     0.01075        0.5258
+race              178  3.403  584.3      605.8    1.04e+05   0.0008542         0.069
+sex               119  4.713  270.9      560.8   3.224e+04      0.0012        0.1128
+capital-gain      449  38.53   1109   1.73e+04    4.98e+05     0.05833        0.5253
+capital-loss      429  14.25  749.9       6115   3.217e+05     0.01334        0.1654
+hours-per-week    782  5.514  429.6       4312   3.359e+05     0.01083        0.3314
+native-country    936  3.978  573.9       3724   5.372e+05    0.001361       0.08953
+noise_1000       1481  2.829  289.5       4190   4.287e+05  -6.324e-05        0.1102
+noise_2           176  2.149  133.1      378.2   2.342e+04   7.804e-05       0.03363
+
+Ranks (1 = most important):
+                weight  gain  cover  total_gain  total_cover  permutation  mean_abs_shap
+marital-status      11     1      5           1           11            2              1
+age                  5     8      8           6            4            3              2
+relationship         9     3      7           2           12            8              3
+capital-gain        10     2      1           3            3            1              4
+occupation           2     6     11           4            5            4              5
+education            4     7     12           5            7            5              6
+hours-per-week       7     9      6           9            8            7              7
+capital-loss        12     5      2           7            9            6              8
+fnlwgt               1    15      9           8            1           10              9
+sex                 16    10     15          15           15           13             10
+noise_1000           3    14     14          10            6           16             11
+workclass            8    12     13          13           10            9             12
+education-num       15     4     10          12           14           12             13
+native-country       6    11      4          11            2           11             14
+race                13    13      3          14           13           14             15
+noise_2             14    16     16          16           16           15             16
+
+Spearman rank correlation between methods:
+               weight  gain  cover  total_gain  total_cover  permutation  mean_abs_shap
+weight           1.00 -0.19  -0.06        0.42         0.82         0.26           0.31
+gain            -0.19  1.00   0.49        0.74        -0.01         0.74           0.71
+cover           -0.06  0.49   1.00        0.45         0.34         0.49           0.30
+total_gain       0.42  0.74   0.45        1.00         0.45         0.83           0.91
+total_cover      0.82 -0.01   0.34        0.45         1.00         0.43           0.33
+permutation      0.26  0.74   0.49        0.83         0.43         1.00           0.86
+mean_abs_shap    0.31  0.71   0.30        0.91         0.33         0.86           1.00
+bias column (baseline log-odds) = -1.1947; sigmoid = 0.2324; train positive rate = 0.2393
+
+One test person (index 19694): p = 0.9992, margin 7.0727 = bias -1.1947 + sum of SHAP 8.2674
+    capital-gain    = 7298                   SHAP +5.2573
+    marital-status  = Married-civ-spouse     SHAP +0.6939
+    education       = Bachelors              SHAP +0.5961
+    relationship    = Husband                SHAP +0.3538
+    hours-per-week  = 60                     SHAP +0.3482
+    occupation      = Sales                  SHAP +0.2855
+
+seed 0: test AUC 0.9262; max |sum(SHAP) - margin| = 1.34e-05
+
+seed 1: test AUC 0.9264; max |sum(SHAP) - margin| = 1.24e-05
+
+seed 2: test AUC 0.9280; max |sum(SHAP) - margin| = 1.14e-05
+
+seed 3: test AUC 0.9264; max |sum(SHAP) - margin| = 1.05e-05
+
+Rank range over seeds per method (min-max):
+               weight   gain  cover total_gain total_cover permutation mean_abs_shap
+marital-status  11-12    1-3    5-5        1-5       10-12         2-3           1-1
+age               4-5    7-8    7-9        6-6         1-4         2-3           2-2
+relationship      9-9    1-3    7-9        1-3       10-12         4-8           3-3
+capital-gain    10-11    2-2    1-1        2-3         2-5         1-1           4-4
+occupation        1-3    6-7  11-13        3-5         3-6         4-5           5-5
+education         4-5    5-7  10-12        4-5         5-7         4-6           6-6
+hours-per-week    7-7    8-9    6-9        8-9         8-9         7-8           7-7
+capital-loss    10-12    4-5    2-2        7-7         8-9         6-7           8-8
+fnlwgt            1-3  14-15   9-11       8-10         1-4       10-14           9-9
+sex             16-16   9-10   6-15      14-15       14-15       10-13         10-11
+noise_1000        1-3  14-15  12-15      10-11         6-7       15-16         10-12
+workclass         8-8  12-13  13-14      12-13       10-11        9-10         11-13
+education-num   14-15   4-10  10-15       9-13       14-15       12-14         11-14
+native-country    6-6  11-11    3-4      10-12         1-2        9-11         13-14
+race            13-15  12-13    3-4      14-16       13-13       13-14         15-15
+noise_2         13-15  16-16  16-16      15-16       16-16       15-16         16-16
+
+LightGBM (300 trees, num_leaves=31, pandas categories native), seed 42, test AUC 0.9279
+                split        gain  mean_abs_shap  permutation  r_split  r_gain  r_mean_abs_shap  r_permutation
+marital-status    102  14314.2355         0.8855       0.0293       14       4                1              3
+age              1519  11831.7484         0.8855       0.0459        3       5                2              2
+capital-gain      621  22214.6736         0.7047       0.0670        5       2                3              1
+relationship       94  30663.6656         0.5805       0.0143       15       1                4              7
+education-num     514  14775.2482         0.4791       0.0237        7       3                5              4
+occupation        386   9980.3747         0.4393       0.0159        8       6                6              5
+hours-per-week    806   5470.1831         0.3223       0.0108        4      10                7              8
+capital-loss      583   7945.9896         0.1804       0.0159        6       7                8              6
+sex               151    835.1447         0.1637       0.0014       11      13                9             10
+fnlwgt           1779   6817.9664         0.1454       0.0009        1       8               10             12
+race               51    236.5329         0.1143       0.0007       16      16               11             13
+noise_1000       1740   6546.2579         0.1087      -0.0003        2       9               12             16
+education         179    742.0384         0.0823       0.0007       10      14               13             14
+workclass         147   1266.1670         0.0772       0.0020       12      11               14              9
+native-country    133    897.4814         0.0631       0.0013       13      12               15             11
+noise_2           195    611.2965         0.0256       0.0001        9      15               16             15
+
+==============================================================================
+PART 6  California housing: a correlated copy of MedInc
+==============================================================================
+noisy copy: MedInc + N(0, 0.25 sd); corr = 0.9704
+
+original: XGB test R2 0.8449, RF test R2 0.8058
+  MedInc       XGB total_gain share 0.5359  XGB mean|SHAP| 0.4059  XGB perm 0.3952  RF MDI 0.4731  RF perm 0.6938
+  permute MedInc together: XGB drop 0.4021  RF drop 0.7057
+
+exact copy: XGB test R2 0.8449, RF test R2 0.7935
+  MedInc       XGB total_gain share 0.5359  XGB mean|SHAP| 0.4059  XGB perm 0.3952  RF MDI 0.2641  RF perm 0.1941
+  MedInc_copy  XGB total_gain share 0.0000  XGB mean|SHAP| 0.0000  XGB perm 0.0000  RF MDI 0.2703  RF perm 0.2229
+  permute MedInc + MedInc_copy together: XGB drop 0.4021  RF drop 0.8495
+
+noisy copy: XGB test R2 0.8447, RF test R2 0.7940
+  MedInc       XGB total_gain share 0.5304  XGB mean|SHAP| 0.3890  XGB perm 0.3110  RF MDI 0.3539  RF perm 0.4140
+  MedInc_copy  XGB total_gain share 0.0113  XGB mean|SHAP| 0.0285  XGB perm 0.0067  RF MDI 0.1790  RF perm 0.0670
+  permute MedInc + MedInc_copy together: XGB drop 0.4055  RF drop 0.8219
+
+==============================================================================
+PART 7  California housing: partial dependence, ICE, off-support grid points
+==============================================================================
+XGBRegressor 300 trees depth 6, test R2 0.8449
+corr(Latitude, Longitude) = -0.9247
+MedInc PDP over grid 1.36..7.59: 1.605 -> 3.308
+ICE rise from first to last grid point: min 0.322 median 1.723 max 2.763 (300 rows)
+Latitude grid | PDP | share of synthetic points > 0.25 deg from every real block
+   32.80 | 3.906 | 0.855
+   33.06 | 3.872 | 0.850
+   33.31 | 3.877 | 0.517
+   33.57 | 3.840 | 0.478
+   33.83 | 3.132 | 0.453
+   34.08 | 2.960 | 0.424
+   34.34 | 2.502 | 0.364
+   34.60 | 2.173 | 0.360
+   34.85 | 1.942 | 0.353
+   35.11 | 1.882 | 0.344
+   35.37 | 1.765 | 0.365
+   35.62 | 1.742 | 0.335
+   35.88 | 1.715 | 0.403
+   36.14 | 1.716 | 0.383
+   36.39 | 1.719 | 0.305
+   36.65 | 1.647 | 0.314
+   36.91 | 1.687 | 0.227
+   37.16 | 1.687 | 0.206
+   37.42 | 1.710 | 0.248
+   37.68 | 1.505 | 0.370
+   37.93 | 1.442 | 0.481
+   38.19 | 1.255 | 0.560
+   38.45 | 1.271 | 0.562
+   38.70 | 1.282 | 0.570
+   38.96 | 1.223 | 0.591
+mean share off-support over the grid: 0.437
+real test rows: share > 0.25 deg from their nearest other block = 0.0014
+
+total runtime 468 s

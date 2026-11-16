@@ -1,0 +1,113 @@
+scikit-learn 1.9.1, lightgbm 4.7.0, numpy 2.5.5, pandas 3.1.1; threads per model 4
+
+==============================================================================
+1. Hand example: 10-point series -> supervised table
+==============================================================================
+       y  lag_1  lag_2   mean_3  leaky_mean_3
+t                                            
+1   20.0    NaN    NaN      NaN           NaN
+2   23.0   20.0    NaN      NaN           NaN
+3   21.0   23.0   20.0      NaN       21.3333
+4   25.0   21.0   23.0  21.3333       23.0000
+5   27.0   25.0   21.0  23.0000       24.3333
+6   24.0   27.0   25.0  24.3333       25.3333
+7   28.0   24.0   27.0  25.3333       26.3333
+8   31.0   28.0   24.0  26.3333       27.6667
+9   29.0   31.0   28.0  27.6667       29.3333
+10  33.0   29.0   31.0  29.3333       31.0000
+  correct (lag_1, lag_2, mean_3)         test MAE 3.277718  predictions [25.7746, 29.67]  coef [-1.2497, -1.3135, 3.2018] intercept 12.7080
+  leaky (lag_1, lag_2, leaky_mean_3)     test MAE 0.000000  predictions [29.0, 33.0]  coef [-1.0, -1.0, 3.0] intercept 0.0000
+  naive (y_t-1) on t = 9..10: MAE 3.0000
+  asserted: leaky model test MAE < 1e-9 because y_t = 3*leaky_mean_3 - lag_1 - lag_2
+
+==============================================================================
+2. Bike Sharing (OpenML 42712) rebuilt as an hourly series
+==============================================================================
+rows in file 17379; hourly grid 17544; hours missing from the file 165
+future hold-out starts at 2012-08-07 12:00:00 (file row 13903); hold-out hours observed 3476
+MASE scale (training MAE of seasonal naive, m = 24): 60.414; (one-step naive, m = 1): 60.143
+mean count: training 174.6, hold-out 248.8
+
+==============================================================================
+3. Horizons 1-48 h: direct vs recursive vs baselines (hold-out, MAE in rentals/hour)
+==============================================================================
+  (recursive h=1 predictions asserted equal to the direct h=1 model)
+  h    n              naive  seasonal naive  seasonal naive  linear regress      HGB direct   HGB recursive
+  1    3370           85.56           78.34           63.69           45.88           29.40           29.40
+  2    3369          145.69           78.31           63.36           58.34           38.72           37.84
+  3    3369          184.35           78.27           62.98           60.09           43.28           42.41
+  6    3369          261.68           78.25           63.57           61.20           51.20           47.32
+  12   3369          287.21           78.17           63.05           61.22           53.01           49.31
+  24   3374           78.26           78.26           63.76           61.18           59.32           50.91
+  48   3378          115.55          115.55           64.52           65.75           68.10           56.36
+  MASE (scale = training MAE of the 24-h seasonal naive) and skill vs seasonal naive (24 h):
+  h=1   naive: MASE 1.416 skill -0.092  seasonal naive (24 h): MASE 1.297 skill +0.000  seasonal naive (168 h): MASE 1.054 skill +0.187  HGB direct: MASE 0.487 skill +0.625  HGB recursive: MASE 0.487 skill +0.625
+  h=2   naive: MASE 2.411 skill -0.860  seasonal naive (24 h): MASE 1.296 skill +0.000  seasonal naive (168 h): MASE 1.049 skill +0.191  HGB direct: MASE 0.641 skill +0.506  HGB recursive: MASE 0.626 skill +0.517
+  h=3   naive: MASE 3.051 skill -1.355  seasonal naive (24 h): MASE 1.296 skill +0.000  seasonal naive (168 h): MASE 1.042 skill +0.195  HGB direct: MASE 0.716 skill +0.447  HGB recursive: MASE 0.702 skill +0.458
+  h=6   naive: MASE 4.331 skill -2.344  seasonal naive (24 h): MASE 1.295 skill +0.000  seasonal naive (168 h): MASE 1.052 skill +0.188  HGB direct: MASE 0.848 skill +0.346  HGB recursive: MASE 0.783 skill +0.395
+  h=12  naive: MASE 4.754 skill -2.674  seasonal naive (24 h): MASE 1.294 skill +0.000  seasonal naive (168 h): MASE 1.044 skill +0.193  HGB direct: MASE 0.878 skill +0.322  HGB recursive: MASE 0.816 skill +0.369
+  h=24  naive: MASE 1.295 skill +0.000  seasonal naive (24 h): MASE 1.295 skill +0.000  seasonal naive (168 h): MASE 1.055 skill +0.185  HGB direct: MASE 0.982 skill +0.242  HGB recursive: MASE 0.843 skill +0.349
+  h=48  naive: MASE 1.913 skill +0.000  seasonal naive (24 h): MASE 1.913 skill +0.000  seasonal naive (168 h): MASE 1.068 skill +0.442  HGB direct: MASE 1.127 skill +0.411  HGB recursive: MASE 0.933 skill +0.512
+
+==============================================================================
+4. The leaky rolling mean on Bike Sharing (h = 1)
+==============================================================================
+  correct features                   hold-out MAE  29.40   TimeSeriesSplit(5, test_size=1000) CV MAE gap=0:  32.14  gap=192:  32.31
+  + leaky_mean_24 (includes y_t)     hold-out MAE  28.21   TimeSeriesSplit(5, test_size=1000) CV MAE gap=0:  31.25  gap=192:  31.79
+
+==============================================================================
+5. Validating the 24-h direct model on the training period only
+==============================================================================
+  training rows 13337; truth = hold-out MAE of the same model 59.32
+  KFold(5, shuffle=True)                           CV MAE  34.09  (folds 5, train sizes 10669-10670, 36s)
+  TimeSeriesSplit(5, test_size=1000, gap=0)        CV MAE  67.76  (folds 5, train sizes 8337-12337, 33s)
+  TimeSeriesSplit(5, test_size=1000, gap=23)       CV MAE  68.60  (folds 5, train sizes 8314-12314, 51s)
+  TimeSeriesSplit(5, test_size=1000, gap=192)      CV MAE  66.20  (folds 5, train sizes 8145-12145, 74s)
+  same, gap=23, max_train_size=1344 (8 weeks)      CV MAE  73.71  (folds 5, train sizes 1344-1344, 84s)
+  same, gap=23, max_train_size=4368 (26 weeks)     CV MAE  68.98  (folds 5, train sizes 4368-4368, 44s)
+  TimeSeriesSplit(40, test_size=24, gap=0)         CV MAE  48.58  (folds 40, train sizes 12377-13313, 471s)
+  TimeSeriesSplit(40, test_size=24, gap=23)        CV MAE  51.44  (folds 40, train sizes 12354-13290, 405s)
+  RandomForest(200, min_samples_leaf=5, max_features=0.5): OOB MAE 37.67, hold-out MAE 53.55
+
+==============================================================================
+6. Bike Sharing, h = 24 direct: which inputs matter (hold-out)
+==============================================================================
+  HGB lags only                                MAE  60.69  mean error (y - pred)   -1.21
+  HGB lags + calendar                          MAE  59.32  mean error (y - pred)  +25.69
+  HGB lags + calendar + observed weather       MAE  42.32  mean error (y - pred)  +12.43
+  HGB calendar + observed weather, no lags     MAE  90.70  mean error (y - pred)  +82.21
+  LinearRegression lags + one-hot calendar        MAE  61.18  mean error   +4.97
+  seasonal naive (24 h) on the same rows          MAE  78.26
+  rows: train 13337, hold-out 3374
+
+==============================================================================
+7. Many related series: one global table vs one model per series (synthetic)
+==============================================================================
+  global HGB (id as categorical), raw levels               mean MASE over 40 series 0.546
+  global HGB, each series divided by its training mean     mean MASE over 40 series 0.504
+  one HGB per series (293 rows each)                       mean MASE over 40 series 0.577
+  global linear regression, normalised                     mean MASE over 40 series 0.817
+  seasonal naive (lag 7)                                   mean MASE over 40 series 0.873
+  naive (lag 1)                                            mean MASE over 40 series 1.836
+  train rows 11720 (40 x 293), test rows 4000
+
+==============================================================================
+8. Extrapolation: trending series (n = 1000, train = first 700), one-step forecasts
+==============================================================================
+  training y range 38.75 .. 128.26; test y range 111.88 .. 159.52
+  fitted trend: intercept 50.050, slope 0.0997 (true 50, 0.1)
+  checked: LightGBM 4.7.0 booster dump has leaf_coeff (linear leaves) when linear_tree=True
+  naive                                    test MAE   4.77  MAE on t >= 900   4.62  max prediction  159.52
+  seasonal naive (m = 7)                   test MAE   2.08  MAE on t >= 900   2.33  max prediction  156.07
+  linear regression on lags (AR)           test MAE   1.54  MAE on t >= 900   1.66  max prediction  156.94
+  HGB on levels                            test MAE  10.85  MAE on t >= 900  19.10  max prediction  126.74
+  RandomForest on levels                   test MAE  10.21  MAE on t >= 900  18.06  max prediction  126.76
+  HGB on differences                       test MAE   1.84  MAE on t >= 900   2.06  max prediction  157.56
+  linear trend + HGB on residual           test MAE   1.66  MAE on t >= 900   1.78  max prediction  158.97
+  HGB on y / mean of last 7                test MAE   2.21  MAE on t >= 900   2.35  max prediction  160.80
+  HGB on log(y)                            test MAE  11.46  MAE on t >= 900  19.92  max prediction  126.79
+  LightGBM on levels                       test MAE  11.45  MAE on t >= 900  19.94  max prediction  126.71
+  LightGBM linear_tree=True on levels      test MAE   3.54  MAE on t >= 900   5.58  max prediction  153.24
+  training max y 128.26; true values on t >= 900 average 144.31
+
+total runtime 1479s

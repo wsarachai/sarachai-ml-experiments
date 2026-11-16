@@ -1,0 +1,206 @@
+python 3.13.14, scikit-learn 1.9.1, xgboost 3.4.1, lightgbm 4.7.0, catboost 1.2.10, numpy 2.5.5, pandas 3.1.1
+20 logical CPUs, 4 threads per model. Other jobs shared the machine; timings are machine-dependent and indicative only.
+SD = sample SD (ddof=1). 'BEYOND noise' = 95% paired t interval over seeds excludes 0.
+
+====================================================================================================
+Adult (binary, 8 categorical columns): 48842 rows, 14 columns; split train/valid/test = [29304, 9769, 9769]; seeds [0, 1, 2, 3, 4]; matched max rounds 2000
+positive rate 0.2393
+block wall time 1387 s
+====================================================================================================
+
+  setting = default   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                     roc_auc       avg_precision            log_loss            accuracy    fit s  pred ms  size MB  trees
+  RandomForest      0.9155 +-0.0025     0.8003 +-0.0054     0.3412 +-0.0090     0.8644 +-0.0039     2.02    129.9    62.37    100
+  HistGB            0.9277 +-0.0013     0.8274 +-0.0029     0.2782 +-0.0020     0.8728 +-0.0024     2.94    103.0     0.41     92
+  XGBoost           0.9273 +-0.0017     0.8266 +-0.0031     0.2791 +-0.0025     0.8716 +-0.0021     1.90     66.8     0.28    100
+  LightGBM          0.9283 +-0.0014     0.8286 +-0.0030     0.2771 +-0.0023     0.8726 +-0.0021     1.15     71.1     0.35    100
+  CatBoost          0.9298 +-0.0016     0.8317 +-0.0031     0.2748 +-0.0022     0.8733 +-0.0019   162.10    102.1     2.14   1000
+  per-seed fit seconds: RandomForest [2.59, 1.98, 2.4, 1.42, 2.02]; HistGB [8.22, 2.41, 4.53, 2.94, 2.46]; XGBoost [1.9, 9.06, 2.01, 1.44, 1.23]; LightGBM [2.29, 1.15, 4.9, 0.98, 0.99]; CatBoost [171.77, 196.73, 162.1, 143.75, 138.21]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    roc_auc        best = CatBoost: RandomForest -0.0143 (+-0.0020) BEYOND noise; HistGB -0.0021 (+-0.0006) BEYOND noise; XGBoost -0.0024 (+-0.0006) BEYOND noise; LightGBM -0.0015 (+-0.0006) BEYOND noise
+    avg_precision  best = CatBoost: RandomForest -0.0314 (+-0.0034) BEYOND noise; HistGB -0.0043 (+-0.0013) BEYOND noise; XGBoost -0.0051 (+-0.0014) BEYOND noise; LightGBM -0.0031 (+-0.0017) BEYOND noise
+    log_loss       best = CatBoost: RandomForest +0.0665 (+-0.0117) BEYOND noise; HistGB +0.0034 (+-0.0010) BEYOND noise; XGBoost +0.0043 (+-0.0013) BEYOND noise; LightGBM +0.0024 (+-0.0010) BEYOND noise
+    accuracy       best = CatBoost: RandomForest -0.0089 (+-0.0027) BEYOND noise; HistGB -0.0005 (+-0.0016) within noise; XGBoost -0.0017 (+-0.0025) within noise; LightGBM -0.0007 (+-0.0017) within noise
+    per-seed roc_auc: RandomForest [0.9156, 0.9181, 0.9166, 0.9113, 0.9158]; HistGB [0.9262, 0.9285, 0.9292, 0.9266, 0.9279]; XGBoost [0.9262, 0.9281, 0.9297, 0.9254, 0.9272]; LightGBM [0.9277, 0.929, 0.9302, 0.9263, 0.9283]; CatBoost [0.9284, 0.9307, 0.9315, 0.9278, 0.9303]
+    per-seed avg_precision: RandomForest [0.8025, 0.8079, 0.7992, 0.7933, 0.7984]; HistGB [0.8253, 0.8321, 0.8281, 0.825, 0.8264]; XGBoost [0.8266, 0.8313, 0.8274, 0.8235, 0.8243]; LightGBM [0.8286, 0.8326, 0.83, 0.8246, 0.8271]; CatBoost [0.8309, 0.837, 0.831, 0.8286, 0.8308]
+    per-seed log_loss: RandomForest [0.326, 0.3449, 0.3408, 0.3493, 0.3452]; HistGB [0.2803, 0.2764, 0.2761, 0.28, 0.2783]; XGBoost [0.2803, 0.2781, 0.2754, 0.2821, 0.2796]; LightGBM [0.2777, 0.2758, 0.2742, 0.2804, 0.2775]; CatBoost [0.2761, 0.2732, 0.2726, 0.2778, 0.2741]
+    per-seed accuracy: RandomForest [0.8661, 0.8699, 0.8599, 0.8645, 0.8616]; HistGB [0.8709, 0.8762, 0.8702, 0.8727, 0.8739]; XGBoost [0.8717, 0.8746, 0.8721, 0.8694, 0.87]; LightGBM [0.8736, 0.8757, 0.8715, 0.871, 0.871]; CatBoost [0.8733, 0.8761, 0.8707, 0.8734, 0.8728]
+
+  setting = matched   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                     roc_auc       avg_precision            log_loss            accuracy    fit s  pred ms  size MB  trees
+  RandomForest      0.9169 +-0.0021     0.8043 +-0.0049     0.3150 +-0.0048     0.8650 +-0.0032     6.02    306.8   187.14    300
+  HistGB            0.9282 +-0.0017     0.8281 +-0.0029     0.2775 +-0.0027     0.8720 +-0.0015     4.56    128.9     0.72    157
+  XGBoost           0.9292 +-0.0018     0.8306 +-0.0030     0.2754 +-0.0025     0.8734 +-0.0028     5.80     74.5     0.70    302
+  LightGBM          0.9283 +-0.0017     0.8286 +-0.0031     0.2771 +-0.0029     0.8719 +-0.0018     1.68     75.1     0.39    108
+  CatBoost          0.9295 +-0.0021     0.8307 +-0.0039     0.2755 +-0.0033     0.8731 +-0.0024    72.22     90.3     0.99    479
+  per-seed fit seconds: RandomForest [6.76, 8.28, 3.73, 6.02, 5.33]; HistGB [14.3, 20.75, 1.12, 4.56, 3.65]; XGBoost [10.82, 11.62, 3.07, 4.95, 5.8]; LightGBM [3.21, 9.1, 0.36, 1.61, 1.68]; CatBoost [72.22, 108.05, 88.09, 43.67, 48.39]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    roc_auc        best = CatBoost: RandomForest -0.0126 (+-0.0009) BEYOND noise; HistGB -0.0013 (+-0.0010) BEYOND noise; XGBoost -0.0003 (+-0.0010) within noise; LightGBM -0.0012 (+-0.0008) BEYOND noise
+    avg_precision  best = CatBoost: RandomForest -0.0264 (+-0.0016) BEYOND noise; HistGB -0.0026 (+-0.0020) BEYOND noise; XGBoost -0.0000 (+-0.0017) within noise; LightGBM -0.0021 (+-0.0019) BEYOND noise
+    log_loss       best = XGBoost: RandomForest +0.0397 (+-0.0042) BEYOND noise; HistGB +0.0021 (+-0.0012) BEYOND noise; LightGBM +0.0017 (+-0.0012) BEYOND noise; CatBoost +0.0001 (+-0.0019) within noise
+    accuracy       best = XGBoost: RandomForest -0.0084 (+-0.0038) BEYOND noise; HistGB -0.0014 (+-0.0017) within noise; LightGBM -0.0015 (+-0.0017) within noise; CatBoost -0.0002 (+-0.0022) within noise
+    per-seed roc_auc: RandomForest [0.9164, 0.919, 0.918, 0.9136, 0.9174]; HistGB [0.9274, 0.9283, 0.9308, 0.9261, 0.9282]; XGBoost [0.9275, 0.9299, 0.9315, 0.9272, 0.9298]; LightGBM [0.9273, 0.9287, 0.9308, 0.9261, 0.9284]; CatBoost [0.9287, 0.9307, 0.9317, 0.9263, 0.9299]
+    per-seed avg_precision: RandomForest [0.806, 0.8112, 0.8036, 0.7976, 0.8031]; HistGB [0.827, 0.8322, 0.8298, 0.8248, 0.8267]; XGBoost [0.8296, 0.8352, 0.8312, 0.827, 0.8303]; LightGBM [0.828, 0.832, 0.831, 0.8242, 0.8276]; CatBoost [0.8314, 0.836, 0.8313, 0.8252, 0.8294]
+    per-seed log_loss: RandomForest [0.3151, 0.3098, 0.3108, 0.3213, 0.3181]; HistGB [0.2785, 0.277, 0.2734, 0.2809, 0.2777]; XGBoost [0.2774, 0.2742, 0.2722, 0.2783, 0.2747]; LightGBM [0.2781, 0.2762, 0.273, 0.2809, 0.2773]; CatBoost [0.2758, 0.2735, 0.2721, 0.2807, 0.2752]
+    per-seed accuracy: RandomForest [0.8673, 0.8686, 0.8605, 0.8646, 0.864]; HistGB [0.8712, 0.8742, 0.872, 0.8702, 0.8722]; XGBoost [0.8724, 0.878, 0.8733, 0.8705, 0.8728]; LightGBM [0.8717, 0.875, 0.8704, 0.8707, 0.8716]; CatBoost [0.8724, 0.8772, 0.8707, 0.873, 0.8726]
+
+  matched - default, roc_auc (paired over seeds):
+    RandomForest  +0.0014 (+-0.0007) BEYOND noise
+    HistGB        +0.0005 (+-0.0011) within noise
+    XGBoost       +0.0018 (+-0.0006) BEYOND noise
+    LightGBM      -0.0000 (+-0.0005) within noise
+    CatBoost      -0.0003 (+-0.0009) within noise
+
+====================================================================================================
+California housing (regression): 20640 rows, 8 columns; split train/valid/test = [12384, 4128, 4128]; seeds [0, 1, 2, 3, 4]; matched max rounds 2000
+block wall time 383 s
+====================================================================================================
+
+  setting = default   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                        rmse                 mae                  r2    fit s  pred ms  size MB  trees
+  RandomForest      0.5191 +-0.0119     0.3409 +-0.0078     0.7953 +-0.0093     3.71    139.0   108.63    100
+  HistGB            0.4691 +-0.0098     0.3131 +-0.0063     0.8329 +-0.0064     3.19     81.7     0.37    100
+  XGBoost           0.4742 +-0.0067     0.3141 +-0.0041     0.8293 +-0.0036     1.30     17.2     0.46    100
+  LightGBM          0.4674 +-0.0093     0.3112 +-0.0054     0.8341 +-0.0059     1.61     49.6     0.29    100
+  CatBoost          0.4455 +-0.0093     0.2939 +-0.0056     0.8493 +-0.0059     8.46     15.5     1.12   1000
+  per-seed fit seconds: RandomForest [1.3, 3.2, 3.71, 3.98, 4.5]; HistGB [0.55, 0.63, 12.63, 3.19, 6.27]; XGBoost [0.64, 0.63, 1.3, 1.32, 1.61]; LightGBM [0.19, 0.18, 1.61, 1.68, 1.86]; CatBoost [5.85, 5.53, 9.36, 8.46, 10.28]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    rmse           best = CatBoost: RandomForest +0.0736 (+-0.0108) BEYOND noise; HistGB +0.0236 (+-0.0062) BEYOND noise; XGBoost +0.0287 (+-0.0053) BEYOND noise; LightGBM +0.0219 (+-0.0041) BEYOND noise
+    mae            best = CatBoost: RandomForest +0.0470 (+-0.0064) BEYOND noise; HistGB +0.0192 (+-0.0026) BEYOND noise; XGBoost +0.0201 (+-0.0039) BEYOND noise; LightGBM +0.0173 (+-0.0025) BEYOND noise
+    r2             best = CatBoost: RandomForest -0.0540 (+-0.0086) BEYOND noise; HistGB -0.0164 (+-0.0044) BEYOND noise; XGBoost -0.0200 (+-0.0033) BEYOND noise; LightGBM -0.0152 (+-0.0028) BEYOND noise
+    per-seed rmse: RandomForest [0.527, 0.5178, 0.5307, 0.4999, 0.52]; HistGB [0.4703, 0.4705, 0.4819, 0.4542, 0.4684]; XGBoost [0.4689, 0.4776, 0.484, 0.468, 0.4726]; LightGBM [0.4663, 0.4732, 0.4788, 0.4543, 0.4645]; CatBoost [0.4401, 0.4531, 0.4549, 0.4325, 0.4468]
+    per-seed mae: RandomForest [0.3472, 0.3377, 0.3475, 0.3289, 0.3432]; HistGB [0.3162, 0.3156, 0.3178, 0.302, 0.3137]; XGBoost [0.3119, 0.3152, 0.3199, 0.3088, 0.3144]; LightGBM [0.3126, 0.3158, 0.3154, 0.3026, 0.3096]; CatBoost [0.2938, 0.298, 0.2977, 0.2843, 0.2958]
+    per-seed r2: RandomForest [0.787, 0.7956, 0.7909, 0.811, 0.7921]; HistGB [0.8304, 0.8312, 0.8276, 0.844, 0.8313]; XGBoost [0.8314, 0.8261, 0.8261, 0.8344, 0.8283]; LightGBM [0.8332, 0.8293, 0.8298, 0.844, 0.8341]; CatBoost [0.8515, 0.8435, 0.8464, 0.8585, 0.8465]
+
+  setting = matched   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                        rmse                 mae                  r2    fit s  pred ms  size MB  trees
+  RandomForest      0.5172 +-0.0118     0.3391 +-0.0077     0.7968 +-0.0092    10.23    429.7   325.94    300
+  HistGB            0.4495 +-0.0091     0.2948 +-0.0061     0.8466 +-0.0051    17.75    326.0     1.95    530
+  XGBoost           0.4549 +-0.0095     0.2972 +-0.0072     0.8429 +-0.0056     9.47     65.1     1.86    639
+  LightGBM          0.4501 +-0.0086     0.2951 +-0.0057     0.8461 +-0.0052     4.05    150.0     1.26    426
+  CatBoost          0.4422 +-0.0068     0.2888 +-0.0028     0.8515 +-0.0042    12.93     15.7     1.20   1848
+  per-seed fit seconds: RandomForest [9.2, 9.55, 10.23, 10.82, 12.17]; HistGB [2.15, 19.05, 19.95, 15.18, 17.75]; XGBoost [9.18, 8.18, 9.47, 13.61, 11.76]; LightGBM [1.5, 3.75, 6.79, 4.05, 8.53]; CatBoost [11.7, 13.6, 12.93, 7.96, 14.39]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    rmse           best = CatBoost: RandomForest +0.0750 (+-0.0146) BEYOND noise; HistGB +0.0073 (+-0.0079) within noise; XGBoost +0.0127 (+-0.0047) BEYOND noise; LightGBM +0.0080 (+-0.0053) BEYOND noise
+    mae            best = CatBoost: RandomForest +0.0503 (+-0.0088) BEYOND noise; HistGB +0.0061 (+-0.0054) BEYOND noise; XGBoost +0.0084 (+-0.0056) BEYOND noise; LightGBM +0.0063 (+-0.0041) BEYOND noise
+    r2             best = CatBoost: RandomForest -0.0547 (+-0.0113) BEYOND noise; HistGB -0.0050 (+-0.0054) within noise; XGBoost -0.0087 (+-0.0032) BEYOND noise; LightGBM -0.0054 (+-0.0036) BEYOND noise
+    per-seed rmse: RandomForest [0.5247, 0.5155, 0.5286, 0.498, 0.519]; HistGB [0.4473, 0.4519, 0.4633, 0.4384, 0.4465]; XGBoost [0.4458, 0.4629, 0.4662, 0.4459, 0.4535]; LightGBM [0.4452, 0.4562, 0.4607, 0.4392, 0.4493]; CatBoost [0.4357, 0.4511, 0.4476, 0.4369, 0.4394]
+    per-seed mae: RandomForest [0.3451, 0.3355, 0.3456, 0.3272, 0.3419]; HistGB [0.2978, 0.2966, 0.3018, 0.2859, 0.2921]; XGBoost [0.2938, 0.3024, 0.306, 0.2878, 0.296]; LightGBM [0.2938, 0.3009, 0.2999, 0.2868, 0.294]; CatBoost [0.2869, 0.291, 0.2924, 0.2859, 0.2877]
+    per-seed r2: RandomForest [0.7889, 0.7974, 0.7926, 0.8125, 0.7929]; HistGB [0.8465, 0.8443, 0.8407, 0.8547, 0.8468]; XGBoost [0.8476, 0.8366, 0.8386, 0.8497, 0.8419]; LightGBM [0.848, 0.8413, 0.8424, 0.8542, 0.8448]; CatBoost [0.8544, 0.8449, 0.8512, 0.8557, 0.8516]
+
+  matched - default, rmse (paired over seeds):
+    RandomForest  -0.0019 (+-0.0007) BEYOND noise
+    HistGB        -0.0196 (+-0.0036) BEYOND noise
+    XGBoost       -0.0193 (+-0.0042) BEYOND noise
+    LightGBM      -0.0173 (+-0.0031) BEYOND noise
+    CatBoost      -0.0033 (+-0.0060) within noise
+
+====================================================================================================
+Covertype (7 classes, 10,000 training rows per seed): 581012 rows, 54 columns; split train/valid/test = [10000, 5000, 20000]; seeds [0, 1, 2, 3, 4]; matched max rounds 500
+block wall time 323 s
+====================================================================================================
+
+  setting = default   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                    accuracy            log_loss    fit s  pred ms  size MB  trees
+  RandomForest      0.8108 +-0.0023     0.5157 +-0.0088     0.49     58.1    47.15    100
+  HistGB            0.7419 +-0.0366     2.5675 +-1.1956     8.97    419.5     2.49    100
+  XGBoost           0.8031 +-0.0028     0.4889 +-0.0074     1.56     51.2     1.56    100
+  LightGBM          0.8044 +-0.0041     0.4967 +-0.0091     0.79    196.7     2.40    100
+  CatBoost          0.8111 +-0.0038     0.4596 +-0.0031    18.87     36.1     4.20   1000
+  per-seed fit seconds: RandomForest [0.38, 0.98, 0.44, 0.49, 0.65]; HistGB [16.04, 14.79, 2.26, 2.31, 8.97]; XGBoost [3.28, 3.02, 0.98, 1.03, 1.56]; LightGBM [5.35, 4.49, 0.61, 0.64, 0.79]; CatBoost [27.1, 26.87, 18.87, 12.98, 16.62]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    accuracy       best = CatBoost: RandomForest -0.0003 (+-0.0039) within noise; HistGB -0.0692 (+-0.0467) BEYOND noise; XGBoost -0.0080 (+-0.0050) BEYOND noise; LightGBM -0.0067 (+-0.0061) BEYOND noise
+    log_loss       best = CatBoost: RandomForest +0.0561 (+-0.0129) BEYOND noise; HistGB +2.1079 (+-1.4870) BEYOND noise; XGBoost +0.0293 (+-0.0094) BEYOND noise; LightGBM +0.0371 (+-0.0116) BEYOND noise
+    per-seed accuracy: RandomForest [0.8148, 0.8099, 0.809, 0.8097, 0.8105]; HistGB [0.7155, 0.7369, 0.7282, 0.806, 0.7229]; XGBoost [0.8026, 0.8079, 0.8007, 0.8022, 0.8022]; LightGBM [0.8018, 0.8109, 0.802, 0.806, 0.8013]; CatBoost [0.8159, 0.8128, 0.8114, 0.8099, 0.8055]
+    per-seed log_loss: RandomForest [0.5199, 0.5166, 0.5277, 0.5072, 0.5072]; HistGB [3.4518, 2.5896, 3.1779, 0.5028, 3.1154]; XGBoost [0.496, 0.482, 0.4965, 0.489, 0.481]; LightGBM [0.5079, 0.4887, 0.5023, 0.4982, 0.4862]; CatBoost [0.4575, 0.4557, 0.4606, 0.4637, 0.4605]
+
+  setting = matched   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                    accuracy            log_loss    fit s  pred ms  size MB  trees
+  RandomForest      0.8125 +-0.0022     0.4888 +-0.0029     2.72    217.7   141.32    300
+  HistGB            0.7802 +-0.0258     1.0739 +-0.4765     2.69    127.1     1.88     73
+  XGBoost           0.7983 +-0.0044     0.4926 +-0.0079     6.76    155.5     5.95    441
+  LightGBM          0.8027 +-0.0048     0.4959 +-0.0072     1.16    137.9     2.01     81
+  CatBoost          0.7867 +-0.0031     0.5074 +-0.0035     5.17     10.9     1.41    500
+  per-seed fit seconds: RandomForest [2.9, 2.72, 2.74, 1.53, 1.88]; HistGB [13.34, 2.34, 1.93, 4.36, 2.69]; XGBoost [12.87, 5.81, 5.43, 6.92, 6.76]; LightGBM [6.0, 0.95, 1.04, 1.2, 1.16]; CatBoost [9.33, 4.0, 4.28, 5.88, 5.17]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    accuracy       best = RandomForest: HistGB -0.0323 (+-0.0317) BEYOND noise; XGBoost -0.0142 (+-0.0077) BEYOND noise; LightGBM -0.0098 (+-0.0082) BEYOND noise; CatBoost -0.0258 (+-0.0033) BEYOND noise
+    log_loss       best = RandomForest: HistGB +0.5852 (+-0.5940) within noise; XGBoost +0.0038 (+-0.0099) within noise; LightGBM +0.0071 (+-0.0076) within noise; CatBoost +0.0186 (+-0.0059) BEYOND noise
+    per-seed accuracy: RandomForest [0.8163, 0.8117, 0.8124, 0.8104, 0.8119]; HistGB [0.8031, 0.7618, 0.7588, 0.8133, 0.7642]; XGBoost [0.792, 0.8041, 0.7974, 0.7981, 0.8001]; LightGBM [0.7962, 0.8096, 0.8015, 0.8026, 0.8035]; CatBoost [0.7901, 0.7882, 0.7869, 0.7865, 0.7817]
+    per-seed log_loss: RandomForest [0.4897, 0.4899, 0.4878, 0.4921, 0.4843]; HistGB [0.6052, 1.3771, 1.519, 0.5103, 1.3581]; XGBoost [0.5022, 0.4848, 0.4997, 0.4905, 0.4859]; LightGBM [0.5054, 0.4909, 0.4988, 0.4975, 0.4869]; CatBoost [0.5057, 0.5021, 0.5103, 0.5107, 0.508]
+
+  matched - default, accuracy (paired over seeds):
+    RandomForest  +0.0017 (+-0.0012) BEYOND noise
+    HistGB        +0.0383 (+-0.0374) BEYOND noise
+    XGBoost       -0.0048 (+-0.0042) BEYOND noise
+    LightGBM      -0.0017 (+-0.0037) within noise
+    CatBoost      -0.0244 (+-0.0012) BEYOND noise
+
+====================================================================================================
+Breast cancer (binary, small data): 569 rows, 30 columns; split train/valid/test = [341, 114, 114]; seeds [0, 1, 2, 3, 4]; matched max rounds 2000
+positive rate 0.6274
+block wall time 104 s
+====================================================================================================
+
+  setting = default   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                     roc_auc       avg_precision            log_loss            accuracy    fit s  pred ms  size MB  trees
+  RandomForest      0.9874 +-0.0111     0.9872 +-0.0133     0.2287 +-0.1776     0.9614 +-0.0171     0.34     79.8     0.26    100
+  HistGB            0.9915 +-0.0059     0.9947 +-0.0041     0.1329 +-0.0573     0.9596 +-0.0048     0.95     51.3     0.23    100
+  XGBoost           0.9915 +-0.0077     0.9938 +-0.0065     0.1049 +-0.0411     0.9649 +-0.0062     0.61     13.1     0.09    100
+  LightGBM          0.9911 +-0.0061     0.9945 +-0.0041     0.1566 +-0.0754     0.9579 +-0.0169     0.38     46.6     0.22    100
+  CatBoost          0.9918 +-0.0068     0.9946 +-0.0047     0.0978 +-0.0411     0.9649 +-0.0107    11.72     19.2     1.13   1000
+  per-seed fit seconds: RandomForest [0.35, 0.34, 0.32, 0.35, 0.19]; HistGB [1.08, 0.95, 0.86, 0.96, 0.17]; XGBoost [0.61, 0.61, 0.63, 0.63, 0.24]; LightGBM [0.5, 0.38, 0.38, 0.38, 0.04]; CatBoost [11.75, 11.72, 11.9, 11.63, 5.82]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    roc_auc        best = CatBoost: RandomForest -0.0044 (+-0.0068) within noise; HistGB -0.0003 (+-0.0046) within noise; XGBoost -0.0003 (+-0.0047) within noise; LightGBM -0.0007 (+-0.0041) within noise
+    avg_precision  best = HistGB: RandomForest -0.0074 (+-0.0123) within noise; XGBoost -0.0008 (+-0.0053) within noise; LightGBM -0.0002 (+-0.0005) within noise; CatBoost -0.0001 (+-0.0031) within noise
+    log_loss       best = CatBoost: RandomForest +0.1309 (+-0.1794) within noise; HistGB +0.0351 (+-0.0311) BEYOND noise; XGBoost +0.0072 (+-0.0244) within noise; LightGBM +0.0589 (+-0.0453) BEYOND noise
+    accuracy       best = XGBoost: RandomForest -0.0035 (+-0.0165) within noise; HistGB -0.0053 (+-0.0060) within noise; LightGBM -0.0070 (+-0.0162) within noise; CatBoost +0.0000 (+-0.0077) within noise
+    per-seed roc_auc: RandomForest [0.9732, 0.9787, 0.9987, 0.9897, 0.9967]; HistGB [0.9821, 0.9897, 0.9931, 0.9957, 0.997]; XGBoost [0.9785, 0.9964, 0.997, 0.9904, 0.995]; LightGBM [0.9815, 0.9897, 0.9927, 0.9944, 0.9974]; CatBoost [0.9818, 0.9904, 0.998, 0.9904, 0.9983]
+    per-seed avg_precision: RandomForest [0.971, 0.975, 0.9992, 0.9928, 0.9981]; HistGB [0.9882, 0.9934, 0.9958, 0.9975, 0.9983]; XGBoost [0.9826, 0.9978, 0.9982, 0.9934, 0.9971]; LightGBM [0.988, 0.9935, 0.9957, 0.9967, 0.9985]; CatBoost [0.9876, 0.9937, 0.9989, 0.9936, 0.9991]
+    per-seed log_loss: RandomForest [0.4421, 0.4024, 0.0872, 0.1177, 0.094]; HistGB [0.2297, 0.1277, 0.1267, 0.0943, 0.086]; XGBoost [0.176, 0.0798, 0.075, 0.1025, 0.0913]; LightGBM [0.2789, 0.1603, 0.137, 0.1331, 0.0738]; CatBoost [0.1649, 0.1022, 0.0713, 0.0916, 0.0589]
+    per-seed accuracy: RandomForest [0.9386, 0.9561, 0.9825, 0.9737, 0.9561]; HistGB [0.9561, 0.9561, 0.9649, 0.9649, 0.9561]; XGBoost [0.9561, 0.9649, 0.9649, 0.9737, 0.9649]; LightGBM [0.9298, 0.9561, 0.9737, 0.9649, 0.9649]; CatBoost [0.9474, 0.9649, 0.9737, 0.9737, 0.9649]
+
+  setting = matched   (metric: mean +- SD over 5 seeds; fit / predict-10k / size / trees: median over seeds)
+  model                     roc_auc       avg_precision            log_loss            accuracy    fit s  pred ms  size MB  trees
+  RandomForest      0.9873 +-0.0102     0.9878 +-0.0120     0.1772 +-0.1304     0.9632 +-0.0144     0.99    207.0     0.76    300
+  HistGB            0.9925 +-0.0049     0.9953 +-0.0034     0.1619 +-0.0816     0.9649 +-0.0088     1.40     78.5     0.30    148
+  XGBoost           0.9905 +-0.0074     0.9933 +-0.0059     0.1066 +-0.0395     0.9632 +-0.0096     2.07     12.7     0.17    119
+  LightGBM          0.9903 +-0.0061     0.9938 +-0.0041     0.1605 +-0.0826     0.9579 +-0.0169     0.49     31.8     0.16     75
+  CatBoost          0.9925 +-0.0054     0.9952 +-0.0036     0.1043 +-0.0470     0.9667 +-0.0157     1.58     11.5     0.11    156
+  per-seed fit seconds: RandomForest [1.01, 1.0, 0.99, 0.98, 0.5]; HistGB [1.62, 1.33, 1.79, 1.4, 0.15]; XGBoost [1.18, 2.07, 4.88, 2.69, 0.73]; LightGBM [0.71, 0.49, 0.66, 0.05, 0.05]; CatBoost [1.2, 1.58, 2.08, 1.73, 0.46]
+  paired difference to the best model (model - best), 95% t interval over seeds:
+    roc_auc        best = HistGB: RandomForest -0.0053 (+-0.0092) within noise; XGBoost -0.0021 (+-0.0064) within noise; LightGBM -0.0022 (+-0.0031) within noise; CatBoost -0.0000 (+-0.0047) within noise
+    avg_precision  best = HistGB: RandomForest -0.0075 (+-0.0127) within noise; XGBoost -0.0020 (+-0.0051) within noise; LightGBM -0.0015 (+-0.0021) within noise; CatBoost -0.0001 (+-0.0031) within noise
+    log_loss       best = CatBoost: RandomForest +0.0729 (+-0.1565) within noise; HistGB +0.0576 (+-0.0563) BEYOND noise; XGBoost +0.0024 (+-0.0201) within noise; LightGBM +0.0562 (+-0.0586) within noise
+    accuracy       best = CatBoost: RandomForest -0.0035 (+-0.0165) within noise; HistGB -0.0018 (+-0.0162) within noise; XGBoost -0.0035 (+-0.0097) within noise; LightGBM -0.0088 (+-0.0077) BEYOND noise
+    per-seed roc_auc: RandomForest [0.9772, 0.9769, 0.9979, 0.9874, 0.997]; HistGB [0.9848, 0.9911, 0.9934, 0.9964, 0.997]; XGBoost [0.9788, 0.9931, 0.997, 0.9878, 0.9957]; LightGBM [0.9818, 0.9871, 0.9934, 0.9914, 0.9977]; CatBoost [0.9854, 0.9907, 0.9977, 0.9904, 0.9983]
+    per-seed avg_precision: RandomForest [0.9809, 0.9708, 0.9987, 0.9903, 0.9983]; HistGB [0.9898, 0.9943, 0.9961, 0.9979, 0.9983]; XGBoost [0.984, 0.9957, 0.9982, 0.991, 0.9975]; LightGBM [0.9881, 0.9915, 0.9961, 0.9945, 0.9987]; CatBoost [0.9906, 0.994, 0.9987, 0.9937, 0.9991]
+    per-seed log_loss: RandomForest [0.1738, 0.4024, 0.0885, 0.1273, 0.0938]; HistGB [0.2978, 0.1418, 0.1697, 0.1076, 0.0928]; XGBoost [0.1727, 0.0914, 0.0754, 0.1122, 0.0815]; LightGBM [0.2866, 0.1392, 0.1862, 0.1248, 0.0657]; CatBoost [0.1803, 0.1061, 0.0784, 0.101, 0.0557]
+    per-seed accuracy: RandomForest [0.9474, 0.9561, 0.9825, 0.9737, 0.9561]; HistGB [0.9561, 0.9737, 0.9649, 0.9737, 0.9561]; XGBoost [0.9474, 0.9649, 0.9649, 0.9737, 0.9649]; LightGBM [0.9298, 0.9561, 0.9737, 0.9649, 0.9649]; CatBoost [0.9386, 0.9737, 0.9737, 0.9737, 0.9737]
+
+  matched - default, roc_auc (paired over seeds):
+    RandomForest  -0.0001 (+-0.0031) within noise
+    HistGB        +0.0010 (+-0.0013) within noise
+    XGBoost       -0.0010 (+-0.0023) within noise
+    LightGBM      -0.0009 (+-0.0022) within noise
+    CatBoost      +0.0007 (+-0.0020) within noise
+
+====================================================================================================
+SCALING  Covertype 7 classes, seed 0, fixed test 50000 rows, every booster 100 rounds, learning rate 0.1, ~32 leaves, no early stopping; RF 100 trees
+fit time = median of 3 fits at 10,000 rows, a single fit above; block wall time 312 s
+====================================================================================================
+      rows model          accuracy  log loss    fit s  pred ms  size MB  fit runs
+     10000 RandomForest     0.8083    0.5206     0.60     73.7    47.47  [0.6, 0.55, 0.91]
+     10000 HistGB           0.7266    3.1878     9.00    332.7     2.57  [9.0, 9.77, 2.47]
+     10000 XGBoost          0.7718    0.5388     2.47     60.0     1.19  [2.15, 2.47, 2.52]
+     10000 LightGBM         0.8055    0.5030     3.96    301.5     2.48  [3.96, 3.87, 4.49]
+     10000 CatBoost         0.7394    0.6177     1.83     17.2     0.22  [1.83, 1.85, 1.78]
+    100000 RandomForest     0.9117    0.2844    12.90    182.6   330.21  [12.9]
+    100000 HistGB           0.8387    0.7525    26.84    303.0     2.57  [26.84]
+    100000 XGBoost          0.7855    0.4970     7.68     57.5     1.41  [7.68]
+    100000 LightGBM         0.8511    0.3698     6.34    253.2     2.48  [6.34]
+    100000 CatBoost         0.7526    0.5836     6.83     17.2     0.22  [6.83]
+    531012 HistGB           0.8546    0.5471    86.76    248.7     2.57  [86.76]
+    531012 XGBoost          0.7870    0.4945    33.18     63.4     1.54  [33.18]
+    531012 LightGBM         0.8586    0.3740    19.16    312.7     2.50  [19.16]
+    531012 CatBoost         0.7542    0.5767    32.85     20.4     0.22  [32.85]
+

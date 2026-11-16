@@ -1,0 +1,15 @@
+seed-0 split: train 10000, test 20000
+training class counts: [3692, 4863, 607, 43, 151, 299, 345]
+
+HistGB, 100 iterations, no early stopping (the default at 10,000 rows)
+  default (lr 0.1, 31 leaves, l2 0)            test acc 0.7155  test log loss 3.4518
+      log loss at iter 10/25/50/100: train [0.5994, 0.4387, 1.2546, 1.5016] test [0.7739, 0.7249, 1.8747, 3.4518]; max |raw score| 26214.7
+  l2_regularization=1                          test acc 0.8036  test log loss 0.4930
+      log loss at iter 10/25/50/100: train [0.5542, 0.3911, 0.289, 0.197] test [0.6488, 0.5464, 0.5065, 0.493]; max |raw score| 8.2
+  learning_rate=0.05                           test acc 0.7923  test log loss 0.5044
+      log loss at iter 10/25/50/100: train [0.6806, 0.4902, 0.3718, 0.269] test [0.7587, 0.6118, 0.5412, 0.5044]; max |raw score| 10.0
+  min_samples_leaf=50                          test acc 0.8000  test log loss 0.5084
+      log loss at iter 10/25/50/100: train [0.5617, 0.4006, 0.2894, 0.185] test [0.6567, 0.5562, 0.5157, 0.5084]; max |raw score| 12.9
+
+LightGBM reference, same size
+  LightGBM default (lr 0.1, 31 leaves, lambda 0) test acc 0.8018  test log loss 0.5079

@@ -1,0 +1,175 @@
+====================================================================================================
+adult  task=binary  rows=48842  split train/val/test=[29304, 9769, 9769]  block time 960 s
+====================================================================================================
+
+Single base models fitted on dev (train+val), test metric mean +- SD over 5 seeds; OOF = 5-fold on dev
+  XGBoost      roc_auc 0.9297 +- 0.0018  log_loss 0.2743 +- 0.0027  accuracy 0.8737 +- 0.0031  | OOF roc_auc 0.9292  log_loss 0.2752  accuracy 0.8742  | fit 3.18s pred10k 84ms
+  LightGBM     roc_auc 0.9294 +- 0.0019  log_loss 0.2749 +- 0.0031  accuracy 0.8735 +- 0.0023  | OOF roc_auc 0.9282  log_loss 0.2770  accuracy 0.8729  | fit 1.62s pred10k 153ms
+  CatBoost     roc_auc 0.9300 +- 0.0027  log_loss 0.2746 +- 0.0040  accuracy 0.8743 +- 0.0026  | OOF roc_auc 0.9291  log_loss 0.2759  accuracy 0.8744  | fit 7.58s pred10k 75ms
+  RandomForest roc_auc 0.9185 +- 0.0028  log_loss 0.2963 +- 0.0045  accuracy 0.8661 +- 0.0033  | OOF roc_auc 0.9183  log_loss 0.2965  accuracy 0.8664  | fit 6.14s pred10k 282ms
+  Linear       roc_auc 0.9072 +- 0.0025  log_loss 0.3173 +- 0.0038  accuracy 0.8524 +- 0.0027  | OOF roc_auc 0.9064  log_loss 0.3187  accuracy 0.8522  | fit 1.53s pred10k 56ms
+  kNN          roc_auc 0.8971 +- 0.0033  log_loss 0.3467 +- 0.0079  accuracy 0.8445 +- 0.0024  | OOF roc_auc 0.8964  log_loss 0.3445  accuracy 0.8429  | fit 0.65s pred10k 2942ms
+
+Residual correlation on the test rows (y - prediction), mean over seeds
+                XGBoost LightGBM CatBoost RandomFo   Linear      kNN
+  XGBoost         1.000    0.991    0.993    0.968    0.933    0.909
+  LightGBM        0.991    1.000    0.987    0.960    0.917    0.897
+  CatBoost        0.993    0.987    1.000    0.969    0.935    0.913
+  RandomForest    0.968    0.960    0.969    1.000    0.951    0.938
+  Linear          0.933    0.917    0.935    0.951    1.000    0.947
+  kNN             0.909    0.897    0.913    0.938    0.947    1.000
+
+--- group boosters: ['XGBoost', 'LightGBM', 'CatBoost']
+  best single by OOF per seed: ['XGBoost', 'XGBoost', 'XGBoost', 'XGBoost', 'XGBoost']   best on test per seed: ['XGBoost', 'XGBoost', 'CatBoost', 'XGBoost', 'XGBoost']
+  mean pairwise residual correlation: 0.990 (min 0.987, max 0.993)
+  best       roc_auc 0.9297 +- 0.0018  log_loss 0.2743 +- 0.0027  accuracy 0.8737 +- 0.0031
+  oracle     roc_auc 0.9301 +- 0.0024  log_loss 0.2739 +- 0.0033  accuracy 0.8739 +- 0.0029
+               vs best: roc_auc d=+0.0004 [-0.0007,+0.0014] noise; log_loss d=-0.0004 [-0.0013,+0.0006] noise; accuracy d=+0.0003 [-0.0005,+0.0010] noise
+  average    roc_auc 0.9307 +- 0.0021  log_loss 0.2727 +- 0.0033  accuracy 0.8746 +- 0.0025
+               vs best: roc_auc d=+0.0009 [+0.0004,+0.0015] BETTER; log_loss d=-0.0016 [-0.0026,-0.0006] BETTER; accuracy d=+0.0009 [-0.0001,+0.0020] noise
+  hard       accuracy 0.8745 +- 0.0029
+               vs best: accuracy d=+0.0008 [+0.0002,+0.0014] BETTER
+  weighted   roc_auc 0.9307 +- 0.0022  log_loss 0.2727 +- 0.0035  accuracy 0.8746 +- 0.0022
+               vs best: roc_auc d=+0.0009 [+0.0003,+0.0016] BETTER; log_loss d=-0.0015 [-0.0026,-0.0004] BETTER; accuracy d=+0.0009 [-0.0004,+0.0023] noise
+  stack      roc_auc 0.9306 +- 0.0023  log_loss 0.2891 +- 0.0038  accuracy 0.8748 +- 0.0025
+               vs best: roc_auc d=+0.0009 [+0.0002,+0.0016] BETTER; log_loss d=+0.0148 [+0.0124,+0.0172] WORSE; accuracy d=+0.0011 [+0.0001,+0.0021] BETTER
+  stack_logit roc_auc 0.9308 +- 0.0022  log_loss 0.2724 +- 0.0035  accuracy 0.8744 +- 0.0024
+               vs best: roc_auc d=+0.0010 [+0.0004,+0.0017] BETTER; log_loss d=-0.0018 [-0.0030,-0.0007] BETTER; accuracy d=+0.0008 [-0.0003,+0.0018] noise
+  stack_gbm  roc_auc 0.9307 +- 0.0022  log_loss 0.2726 +- 0.0036  accuracy 0.8745 +- 0.0024
+               vs best: roc_auc d=+0.0010 [+0.0003,+0.0016] BETTER; log_loss d=-0.0017 [-0.0029,-0.0005] BETTER; accuracy d=+0.0009 [-0.0006,+0.0023] noise
+  blend      roc_auc 0.9300 +- 0.0020  log_loss 0.2905 +- 0.0033  accuracy 0.8737 +- 0.0024
+               vs best: roc_auc d=+0.0002 [-0.0002,+0.0007] noise; log_loss d=+0.0163 [+0.0141,+0.0185] WORSE; accuracy d=+0.0000 [-0.0014,+0.0015] noise
+  leak       roc_auc 0.9160 +- 0.0025  log_loss 0.3221 +- 0.0044  accuracy 0.8689 +- 0.0016
+               vs best: roc_auc d=-0.0138 [-0.0151,-0.0125] WORSE; log_loss d=+0.0478 [+0.0431,+0.0526] WORSE; accuracy d=-0.0048 [-0.0068,-0.0029] WORSE
+  simplex weights (OOF), mean over seeds: XGBoost 0.344, LightGBM 0.304, CatBoost 0.353
+  stack meta coefs (+intercept), mean: 3.029, 0.838, 2.910, -3.356
+  stack_logit meta coefs (+intercept), mean: 0.338, 0.281, 0.404, 0.027
+  blend meta coefs (+intercept), mean: 2.860, 0.907, 2.819, -3.302
+  LEAK  meta coefs (+intercept), mean: -9.484, 18.262, -1.190, -3.752
+  log_loss on the rows the meta-learner was fitted on: leak (in-sample) 0.2203, stack (OOF) 0.2903
+  leak - stack on test roc_auc: -0.0146 [-0.0154,-0.0138]
+  leak - stack on test log_loss: +0.0330 [+0.0291,+0.0369]
+  cost (median over seeds): best fit 3.2s pred10k 84ms; average fit 12.4s pred10k 308ms; stack fit 67.3s pred10k 308ms; blend fit 10.4s pred10k 308ms
+  (weighted = stack fit cost minus the meta fit; hard/average = average)
+
+--- group diverse: ['LightGBM', 'RandomForest', 'Linear', 'kNN']
+  best single by OOF per seed: ['LightGBM', 'LightGBM', 'LightGBM', 'LightGBM', 'LightGBM']   best on test per seed: ['LightGBM', 'LightGBM', 'LightGBM', 'LightGBM', 'LightGBM']
+  mean pairwise residual correlation: 0.935 (min 0.897, max 0.960)
+  best       roc_auc 0.9294 +- 0.0019  log_loss 0.2749 +- 0.0031  accuracy 0.8735 +- 0.0023
+  oracle     roc_auc 0.9294 +- 0.0019  log_loss 0.2749 +- 0.0031  accuracy 0.8735 +- 0.0023
+               vs best: roc_auc d=+0.0000 [+0.0000,+0.0000] noise; log_loss d=+0.0000 [+0.0000,+0.0000] noise; accuracy d=+0.0000 [+0.0000,+0.0000] noise
+  average    roc_auc 0.9217 +- 0.0022  log_loss 0.2930 +- 0.0032  accuracy 0.8694 +- 0.0021
+               vs best: roc_auc d=-0.0077 [-0.0088,-0.0066] WORSE; log_loss d=+0.0181 [+0.0163,+0.0199] WORSE; accuracy d=-0.0040 [-0.0059,-0.0022] WORSE
+  hard       accuracy 0.8667 +- 0.0025
+               vs best: accuracy d=-0.0068 [-0.0079,-0.0057] WORSE
+  weighted   roc_auc 0.9294 +- 0.0018  log_loss 0.2749 +- 0.0030  accuracy 0.8735 +- 0.0027
+               vs best: roc_auc d=-0.0000 [-0.0001,+0.0001] noise; log_loss d=+0.0000 [-0.0003,+0.0003] noise; accuracy d=-0.0000 [-0.0008,+0.0008] noise
+  stack      roc_auc 0.9285 +- 0.0020  log_loss 0.2926 +- 0.0035  accuracy 0.8738 +- 0.0030
+               vs best: roc_auc d=-0.0009 [-0.0013,-0.0004] WORSE; log_loss d=+0.0177 [+0.0152,+0.0202] WORSE; accuracy d=+0.0004 [-0.0008,+0.0015] noise
+  stack_logit roc_auc 0.9296 +- 0.0019  log_loss 0.2745 +- 0.0030  accuracy 0.8740 +- 0.0028
+               vs best: roc_auc d=+0.0002 [+0.0000,+0.0004] BETTER; log_loss d=-0.0004 [-0.0008,-0.0000] BETTER; accuracy d=+0.0005 [-0.0005,+0.0016] noise
+  stack_gbm  roc_auc 0.9299 +- 0.0019  log_loss 0.2741 +- 0.0030  accuracy 0.8740 +- 0.0023
+               vs best: roc_auc d=+0.0005 [-0.0001,+0.0011] noise; log_loss d=-0.0008 [-0.0020,+0.0005] noise; accuracy d=+0.0005 [-0.0002,+0.0012] noise
+  blend      roc_auc 0.9271 +- 0.0019  log_loss 0.2955 +- 0.0036  accuracy 0.8725 +- 0.0021
+               vs best: roc_auc d=-0.0023 [-0.0030,-0.0015] WORSE; log_loss d=+0.0207 [+0.0173,+0.0240] WORSE; accuracy d=-0.0010 [-0.0017,-0.0002] WORSE
+  leak       roc_auc 0.9091 +- 0.0027  log_loss 0.4763 +- 0.0089  accuracy 0.8543 +- 0.0025
+               vs best: roc_auc d=-0.0203 [-0.0219,-0.0187] WORSE; log_loss d=+0.2014 [+0.1935,+0.2094] WORSE; accuracy d=-0.0191 [-0.0207,-0.0175] WORSE
+  simplex weights (OOF), mean over seeds: LightGBM 0.929, RandomForest 0.071, Linear 0.000, kNN 0.000
+  stack meta coefs (+intercept), mean: 4.769, 1.439, 0.422, 0.061, -3.324
+  stack_logit meta coefs (+intercept), mean: 0.787, 0.117, 0.057, 0.014, 0.011
+  blend meta coefs (+intercept), mean: 4.395, 1.519, 0.345, 0.254, -3.279
+  LEAK  meta coefs (+intercept), mean: 1.526, 1.816, 0.002, 12.766, -8.059
+  log_loss on the rows the meta-learner was fitted on: leak (in-sample) 0.0009, stack (OOF) 0.2942
+  leak - stack on test roc_auc: -0.0194 [-0.0207,-0.0182]
+  leak - stack on test log_loss: +0.1837 [+0.1767,+0.1907]
+  cost (median over seeds): best fit 1.6s pred10k 153ms; average fit 10.0s pred10k 3454ms; stack fit 51.7s pred10k 3454ms; blend fit 7.7s pred10k 3454ms
+  (weighted = stack fit cost minus the meta fit; hard/average = average)
+
+  sklearn check (seed 0, diverse): {'max_abs_diff_voting': 2.220446049250313e-16, 'max_abs_diff_stacking': 7.216449660063518e-16, 'sklearn_stack_fit_s': 59.2204730000085, 'sklearn_stack_pred_10k_s': 3.982476700010011, 'final_estimator': 'LogisticRegression', 'stack_method_': ['predict_proba', 'predict_proba', 'predict_proba', 'predict_proba']}
+
+====================================================================================================
+california  task=regression  rows=20640  split train/val/test=[12384, 4128, 4128]  block time 573 s
+====================================================================================================
+
+Single base models fitted on dev (train+val), test metric mean +- SD over 5 seeds; OOF = 5-fold on dev
+  XGBoost      rmse 0.4467 +- 0.0061  | OOF rmse 0.4579  | fit 3.66s pred10k 57ms
+  LightGBM     rmse 0.4402 +- 0.0067  | OOF rmse 0.4525  | fit 1.61s pred10k 218ms
+  CatBoost     rmse 0.4392 +- 0.0071  | OOF rmse 0.4492  | fit 6.06s pred10k 15ms
+  RandomForest rmse 0.4904 +- 0.0080  | OOF rmse 0.5006  | fit 3.54s pred10k 282ms
+  Linear       rmse 0.7292 +- 0.0040  | OOF rmse 0.7421  | fit 0.07s pred10k 8ms
+  kNN          rmse 0.6331 +- 0.0073  | OOF rmse 0.6342  | fit 0.07s pred10k 1052ms
+
+Residual correlation on the test rows (y - prediction), mean over seeds
+                XGBoost LightGBM CatBoost RandomFo   Linear      kNN
+  XGBoost         1.000    0.939    0.944    0.870    0.612    0.698
+  LightGBM        0.939    1.000    0.933    0.862    0.602    0.690
+  CatBoost        0.944    0.933    1.000    0.881    0.635    0.716
+  RandomForest    0.870    0.862    0.881    1.000    0.755    0.837
+  Linear          0.612    0.602    0.635    0.755    1.000    0.834
+  kNN             0.698    0.690    0.716    0.837    0.834    1.000
+
+--- group boosters: ['XGBoost', 'LightGBM', 'CatBoost']
+  best single by OOF per seed: ['CatBoost', 'CatBoost', 'CatBoost', 'LightGBM', 'CatBoost']   best on test per seed: ['LightGBM', 'LightGBM', 'CatBoost', 'CatBoost', 'CatBoost']
+  mean pairwise residual correlation: 0.939 (min 0.933, max 0.944)
+  best       rmse 0.4393 +- 0.0071
+  oracle     rmse 0.4389 +- 0.0072
+               vs best: rmse d=-0.0004 [-0.0010,+0.0003] noise
+  average    rmse 0.4329 +- 0.0070
+               vs best: rmse d=-0.0064 [-0.0084,-0.0044] BETTER
+  weighted   rmse 0.4321 +- 0.0074
+               vs best: rmse d=-0.0072 [-0.0090,-0.0054] BETTER
+  stack      rmse 0.4321 +- 0.0074
+               vs best: rmse d=-0.0072 [-0.0091,-0.0053] BETTER
+  stack_gbm  rmse 0.4333 +- 0.0086
+               vs best: rmse d=-0.0060 [-0.0088,-0.0032] BETTER
+  stack_pt   rmse 0.4309 +- 0.0068
+               vs best: rmse d=-0.0084 [-0.0091,-0.0077] BETTER
+  blend      rmse 0.4407 +- 0.0085
+               vs best: rmse d=+0.0014 [-0.0036,+0.0064] noise
+  leak       rmse 0.4672 +- 0.0052
+               vs best: rmse d=+0.0279 [+0.0234,+0.0324] WORSE
+  simplex weights (OOF), mean over seeds: XGBoost 0.116, LightGBM 0.393, CatBoost 0.491
+  stack meta coefs (+intercept), mean: 0.129, 0.390, 0.487, -0.012
+  blend meta coefs (+intercept), mean: 0.192, 0.381, 0.433, -0.014
+  LEAK  meta coefs (+intercept), mean: 0.457, 1.343, -0.787, -0.027
+  rmse on the rows the meta-learner was fitted on: leak (in-sample) 0.2281, stack (OOF) 0.4426
+  leak - stack on test rmse: +0.0351 [+0.0315,+0.0388]
+  cost (median over seeds): best fit 5.9s pred10k 15ms; average fit 10.8s pred10k 289ms; stack fit 62.9s pred10k 289ms; blend fit 10.1s pred10k 289ms
+  (weighted = stack fit cost minus the meta fit; hard/average = average)
+
+--- group diverse: ['LightGBM', 'RandomForest', 'Linear', 'kNN']
+  best single by OOF per seed: ['LightGBM', 'LightGBM', 'LightGBM', 'LightGBM', 'LightGBM']   best on test per seed: ['LightGBM', 'LightGBM', 'LightGBM', 'LightGBM', 'LightGBM']
+  mean pairwise residual correlation: 0.763 (min 0.602, max 0.862)
+  best       rmse 0.4402 +- 0.0067
+  oracle     rmse 0.4402 +- 0.0067
+               vs best: rmse d=+0.0000 [+0.0000,+0.0000] noise
+  average    rmse 0.5207 +- 0.0045
+               vs best: rmse d=+0.0806 [+0.0770,+0.0842] WORSE
+  weighted   rmse 0.4392 +- 0.0069
+               vs best: rmse d=-0.0010 [-0.0023,+0.0004] noise
+  stack      rmse 0.4388 +- 0.0072
+               vs best: rmse d=-0.0014 [-0.0033,+0.0005] noise
+  stack_gbm  rmse 0.4391 +- 0.0071
+               vs best: rmse d=-0.0011 [-0.0033,+0.0012] noise
+  stack_pt   rmse 0.4374 +- 0.0068
+               vs best: rmse d=-0.0027 [-0.0054,-0.0001] BETTER
+  blend      rmse 0.4485 +- 0.0095
+               vs best: rmse d=+0.0083 [+0.0025,+0.0141] WORSE
+  leak       rmse 0.6331 +- 0.0073
+               vs best: rmse d=+0.1929 [+0.1832,+0.2027] WORSE
+  simplex weights (OOF), mean over seeds: LightGBM 0.857, RandomForest 0.143, Linear 0.000, kNN 0.000
+  stack meta coefs (+intercept), mean: 0.834, 0.201, -0.011, -0.012, -0.027
+  blend meta coefs (+intercept), mean: 0.853, 0.190, -0.030, -0.005, -0.017
+  LEAK  meta coefs (+intercept), mean: 0.000, 0.000, -0.000, 1.000, -0.000
+  rmse on the rows the meta-learner was fitted on: leak (in-sample) 0.0000, stack (OOF) 0.4507
+  leak - stack on test rmse: +0.1943 [+0.1833,+0.2053]
+  cost (median over seeds): best fit 1.6s pred10k 218ms; average fit 5.0s pred10k 1554ms; stack fit 26.2s pred10k 1554ms; blend fit 3.9s pred10k 1554ms
+  (weighted = stack fit cost minus the meta fit; hard/average = average)
+
+  identity check seed 0 boosters: sqrt(w'Mw) = 0.428353  vs  average RMSE 0.428353
+
+  identity check seed 0 diverse: sqrt(w'Mw) = 0.516804  vs  average RMSE 0.516804
+
+  sklearn check (seed 0, diverse): {'max_abs_diff_voting': 1.7763568394002505e-15, 'max_abs_diff_stacking': 4.618527782440651e-14, 'sklearn_stack_fit_s': 25.90521670000453, 'sklearn_stack_pred_10k_s': 1.6031306000077166, 'final_estimator': 'RidgeCV', 'stack_method_': ['predict', 'predict', 'predict', 'predict']}
+
+environment: {"python": "3.13.14", "sklearn": "1.9.1", "xgboost": "3.4.1", "lightgbm": "4.7.0", "catboost": "1.2.10", "numpy": "2.5.5", "pandas": "3.1.1", "threads_per_model": 4}

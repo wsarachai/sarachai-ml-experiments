@@ -1,0 +1,172 @@
+
+==============================================================================
+1. Hand example A: 9 trials, 3x3 grid vs random, one important dimension
+==============================================================================
+Important dimension u in [0, 1); the 'good' region is an interval of width 0.1
+placed uniformly at random (circular, no edge effects).
+grid 3x3: distinct u values = 3 -> P(hit) = 3 x 0.1 = 0.3000
+random 9: distinct u values = 9 -> P(hit) = 1 - 0.9^9 = 0.6126
+Monte Carlo (200,000 draws): grid 0.3036, random 0.6136
+
+==============================================================================
+2. Hand example B: early-stopping trace on a fixed validation-loss sequence
+==============================================================================
+round   :      1      2      3      4      5      6      7      8      9     10     11     12
+val loss:  0.700  0.620  0.580  0.570  0.575  0.565  0.566  0.567  0.568  0.560  0.555  0.550
+patience 3: by hand stop after round 9, best round 6
+patience 5: by hand stop after round 12, best round 12
+XGBoost 3.4.1 xgb.train(early_stopping_rounds=3): trees kept = 9, best_iteration = 5 (0-based)
+LightGBM 4.7.0 early_stopping(3): rounds evaluated = 9, best_iteration = 6 (1-based), current_iteration() = 6
+HistGradientBoosting rule (n_iter_no_change=3, tol=0, baseline 0.8): stops after round 9
+
+==============================================================================
+3. Installed versions, defaults and early-stopping behaviour
+==============================================================================
+scikit-learn 1.9.1, xgboost 3.4.1, lightgbm 4.7.0, catboost 1.2.10
+XGBClassifier defaults (from save_config): {'eta': '0.300000012', 'max_depth': '6', 'max_leaves': '0', 'min_child_weight': '1', 'subsample': '1', 'colsample_bytree': '1', 'reg_lambda': '1', 'reg_alpha': '0', 'gamma': '0'} rounds = 100
+XGBoost fit(early_stopping_rounds=...) -> TypeError: XGBClassifier.fit() got an unexpected keyword argument 'early_stopping_rounds'
+XGBoost ES: best_iteration=372 (0-based), trees kept=423; predict uses best: True; test log loss best=0.2759 all trees=0.2757
+LGBMClassifier params: {'colsample_bytree': 1.0, 'learning_rate': 0.1, 'max_depth': -1, 'min_child_samples': 20, 'min_child_weight': 0.001, 'min_split_gain': 0.0, 'n_estimators': 100, 'num_leaves': 31, 'reg_alpha': 0.0, 'reg_lambda': 0.0, 'subsample': 1.0, 'subsample_freq': 0}
+LightGBM fit(eval_set=...) warnings: ["The argument 'eval_set' is deprecated, use 'eval_X' and 'eval_y' instead."]
+LightGBM ES: best_iteration_=375 (1-based), trees in booster=375
+CatBoost (eval_set + early_stopping_rounds): {'iterations': 1000, 'learning_rate': 0.07415899634361267, 'depth': 6, 'l2_leaf_reg': 3, 'rsm': 1, 'subsample': 0.800000011920929, 'bootstrap_type': 'MVS', 'min_data_in_leaf': 1, 'use_best_model': True, 'od_type': 'Iter', 'od_wait': 50} best_iteration_=550 tree_count_=551 test log loss=0.2781
+HGB early_stopping=True, max_iter=2000, lr=0.3 (validation_fraction=0.1): n_iter_=36, best validation iteration=26, trees kept=36
+HGB fit(X_val=..., y_val=...) with early_stopping='auto': n_iter_=46, len(validation_score_)=47
+HGB early_stopping='auto' on 39073 rows (>10000) -> n_iter_=100
+
+==============================================================================
+4. How much tuning buys (untouched 20% test set, 5 seeds)
+==============================================================================
+Adult: test log loss (and ROC AUC); California: test RMSE (x $100k). Lower is better.
+Splits per seed: train 64% / validation 16% / test 20%. Random search: 16 candidates, early stopping (patience 50) on validation.
+(section wall time 1652 s)
+
+--- adult ---
+xgb default    test mean 0.2783 sd 0.0038  [0.2778, 0.2772, 0.2741, 0.2844, 0.2780]  rounds median 100  sec mean 0.9  AUC mean 0.9276 sd 0.0020
+xgb es         test mean 0.2751 sd 0.0027  [0.2759, 0.2748, 0.2710, 0.2787, 0.2749]  rounds median 350  sec mean 5.7  AUC mean 0.9294 sd 0.0018
+xgb es_refit   test mean 0.2730 sd 0.0028  [0.2739, 0.2718, 0.2695, 0.2772, 0.2725]  rounds median 438  sec mean 4.5  AUC mean 0.9302 sd 0.0016
+xgb rs         test mean 0.2756 sd 0.0026  [0.2784, 0.2749, 0.2721, 0.2780, 0.2747]  rounds median 1180  sec mean 151.9  AUC mean 0.9293 sd 0.0018
+xgb rs_refit   test mean 0.2734 sd 0.0028  [0.2749, 0.2720, 0.2695, 0.2769, 0.2736]  rounds median 1475  sec mean 10.6  AUC mean 0.9302 sd 0.0018
+lgb default    test mean 0.2753 sd 0.0023  [0.2769, 0.2737, 0.2721, 0.2777, 0.2759]  rounds median 100  sec mean 0.7  AUC mean 0.9293 sd 0.0014
+lgb es         test mean 0.2765 sd 0.0023  [0.2772, 0.2762, 0.2727, 0.2790, 0.2771]  rounds median 264  sec mean 2.0  AUC mean 0.9288 sd 0.0015
+lgb es_refit   test mean 0.2743 sd 0.0022  [0.2754, 0.2732, 0.2711, 0.2769, 0.2751]  rounds median 330  sec mean 2.1  AUC mean 0.9297 sd 0.0014
+lgb rs         test mean 0.2755 sd 0.0018  [0.2770, 0.2755, 0.2726, 0.2768, 0.2754]  rounds median 534  sec mean 47.0  AUC mean 0.9294 sd 0.0014
+lgb rs_refit   test mean 0.2740 sd 0.0021  [0.2751, 0.2729, 0.2709, 0.2765, 0.2743]  rounds median 668  sec mean 3.3  AUC mean 0.9300 sd 0.0015
+ rf rf_default test mean 0.3688 sd 0.0193  [0.3664, 0.3951, 0.3413, 0.3669, 0.3744]  rounds median 100  sec mean 2.3  AUC mean 0.9066 sd 0.0026
+xgb es - default: mean -0.0032 sd 0.0015 (better in 5/5 seeds)
+xgb rs - default: mean -0.0027 sd 0.0025 (better in 4/5 seeds)
+xgb rs - es: mean +0.0006 sd 0.0013 (better in 2/5 seeds)
+xgb es_refit - es: mean -0.0021 sd 0.0006 (better in 5/5 seeds)
+xgb rs_refit - rs: mean -0.0022 sd 0.0011 (better in 5/5 seeds)
+xgb rs_refit - default: mean -0.0049 sd 0.0017 (better in 5/5 seeds)
+xgb es: validation score 0.2779 vs test 0.2751 -> val - test mean +0.0028 sd 0.0046 (val better than test in 2/5)
+xgb rs: validation score 0.2774 vs test 0.2756 -> val - test mean +0.0018 sd 0.0039 (val better than test in 2/5)
+lgb es - default: mean +0.0012 sd 0.0009 (better in 0/5 seeds)
+lgb rs - default: mean +0.0002 sd 0.0011 (better in 2/5 seeds)
+lgb rs - es: mean -0.0010 sd 0.0009 (better in 5/5 seeds)
+lgb es_refit - es: mean -0.0021 sd 0.0006 (better in 5/5 seeds)
+lgb rs_refit - rs: mean -0.0015 sd 0.0008 (better in 5/5 seeds)
+lgb rs_refit - default: mean -0.0013 sd 0.0004 (better in 5/5 seeds)
+lgb es: validation score 0.2784 vs test 0.2765 -> val - test mean +0.0019 sd 0.0047 (val better than test in 2/5)
+lgb rs: validation score 0.2780 vs test 0.2755 -> val - test mean +0.0026 sd 0.0036 (val better than test in 2/5)
+  chosen xgb seed 0: rounds 71, {'colsample_bytree': 0.53479, 'gamma': 0.45291, 'learning_rate': 0.26389, 'max_depth': 6, 'min_child_weight': 1.36077, 'reg_alpha': 0.43077, 'reg_lambda': 0.08059, 'subsample': 0.90816}
+  chosen lgb seed 0: rounds 235, {'colsample_bytree': 0.66115, 'learning_rate': 0.03768, 'min_child_samples': 26, 'min_split_gain': 0.00119, 'num_leaves': 64, 'reg_alpha': 0.05661, 'reg_lambda': 0.01939, 'subsample': 0.77982}
+  chosen xgb seed 1: rounds 2015, {'colsample_bytree': 0.71483, 'gamma': 0.03891, 'learning_rate': 0.02626, 'max_depth': 3, 'min_child_weight': 1.09788, 'reg_alpha': 0.00454, 'reg_lambda': 0.00275, 'subsample': 0.86503}
+  chosen lgb seed 1: rounds 206, {'colsample_bytree': 0.72597, 'learning_rate': 0.1021, 'min_child_samples': 5, 'min_split_gain': 0.29065, 'num_leaves': 16, 'reg_alpha': 0.33885, 'reg_lambda': 0.64366, 'subsample': 0.94056}
+  chosen xgb seed 2: rounds 2135, {'colsample_bytree': 0.51834, 'gamma': 0.63511, 'learning_rate': 0.02415, 'max_depth': 3, 'min_child_weight': 1.14512, 'reg_alpha': 0.00234, 'reg_lambda': 1.01359, 'subsample': 0.94381}
+  chosen lgb seed 2: rounds 864, {'colsample_bytree': 0.62678, 'learning_rate': 0.02615, 'min_child_samples': 11, 'min_split_gain': 0.46012, 'num_leaves': 16, 'reg_alpha': 1.75874, 'reg_lambda': 0.06574, 'subsample': 0.9409}
+  chosen xgb seed 3: rounds 290, {'colsample_bytree': 0.70539, 'gamma': 0.02139, 'learning_rate': 0.03231, 'max_depth': 8, 'min_child_weight': 0.60171, 'reg_alpha': 0.02779, 'reg_lambda': 0.007, 'subsample': 0.955}
+  chosen lgb seed 3: rounds 669, {'colsample_bytree': 0.67114, 'learning_rate': 0.0728, 'min_child_samples': 10, 'min_split_gain': 0.00601, 'num_leaves': 8, 'reg_alpha': 0.02779, 'reg_lambda': 0.007, 'subsample': 0.955}
+  chosen xgb seed 4: rounds 1180, {'colsample_bytree': 0.74388, 'gamma': 0.44082, 'learning_rate': 0.02204, 'max_depth': 6, 'min_child_weight': 1.01323, 'reg_alpha': 0.00146, 'reg_lambda': 4.27544, 'subsample': 0.99911}
+  chosen lgb seed 4: rounds 534, {'colsample_bytree': 0.99, 'learning_rate': 0.09317, 'min_child_samples': 21, 'min_split_gain': 0.00633, 'num_leaves': 8, 'reg_alpha': 0.03824, 'reg_lambda': 1.25296, 'subsample': 0.91329}
+
+--- california ---
+xgb default    test mean 0.4643 sd 0.0055  [0.4574, 0.4712, 0.4685, 0.4623, 0.4620]  rounds median 100  sec mean 0.9
+xgb es         test mean 0.4519 sd 0.0102  [0.4474, 0.4563, 0.4662, 0.4390, 0.4504]  rounds median 893  sec mean 11.5
+xgb es_refit   test mean 0.4440 sd 0.0080  [0.4367, 0.4515, 0.4539, 0.4384, 0.4397]  rounds median 1116  sec mean 9.0
+xgb rs         test mean 0.4450 sd 0.0074  [0.4449, 0.4489, 0.4547, 0.4354, 0.4410]  rounds median 1591  sec mean 225.2
+xgb rs_refit   test mean 0.4340 sd 0.0075  [0.4296, 0.4394, 0.4444, 0.4294, 0.4273]  rounds median 1989  sec mean 17.5
+lgb default    test mean 0.4625 sd 0.0086  [0.4587, 0.4705, 0.4713, 0.4508, 0.4613]  rounds median 100  sec mean 0.8
+lgb es         test mean 0.4453 sd 0.0094  [0.4369, 0.4536, 0.4560, 0.4354, 0.4447]  rounds median 931  sec mean 7.0
+lgb es_refit   test mean 0.4376 sd 0.0061  [0.4321, 0.4425, 0.4445, 0.4309, 0.4383]  rounds median 1164  sec mean 8.1
+lgb rs         test mean 0.4404 sd 0.0108  [0.4315, 0.4461, 0.4537, 0.4273, 0.4434]  rounds median 996  sec mean 88.1
+lgb rs_refit   test mean 0.4317 sd 0.0087  [0.4276, 0.4383, 0.4424, 0.4208, 0.4292]  rounds median 1245  sec mean 28.9
+ rf rf_default test mean 0.5041 sd 0.0084  [0.5129, 0.5039, 0.5076, 0.4904, 0.5055]  rounds median 100  sec mean 5.4
+xgb es - default: mean -0.0124 sd 0.0077 (better in 5/5 seeds)
+xgb rs - default: mean -0.0193 sd 0.0061 (better in 5/5 seeds)
+xgb rs - es: mean -0.0069 sd 0.0038 (better in 5/5 seeds)
+xgb es_refit - es: mean -0.0078 sd 0.0049 (better in 5/5 seeds)
+xgb rs_refit - rs: mean -0.0109 sd 0.0037 (better in 5/5 seeds)
+xgb rs_refit - default: mean -0.0303 sd 0.0043 (better in 5/5 seeds)
+xgb es: validation score 0.4503 vs test 0.4519 -> val - test mean -0.0016 sd 0.0148 (val better than test in 3/5)
+xgb rs: validation score 0.4429 vs test 0.4450 -> val - test mean -0.0020 sd 0.0102 (val better than test in 3/5)
+lgb es - default: mean -0.0172 sd 0.0027 (better in 5/5 seeds)
+lgb rs - default: mean -0.0221 sd 0.0042 (better in 5/5 seeds)
+lgb rs - es: mean -0.0049 sd 0.0030 (better in 5/5 seeds)
+lgb es_refit - es: mean -0.0077 sd 0.0034 (better in 5/5 seeds)
+lgb rs_refit - rs: mean -0.0087 sd 0.0041 (better in 5/5 seeds)
+lgb rs_refit - default: mean -0.0309 sd 0.0014 (better in 5/5 seeds)
+lgb es: validation score 0.4458 vs test 0.4453 -> val - test mean +0.0004 sd 0.0123 (val better than test in 3/5)
+lgb rs: validation score 0.4397 vs test 0.4404 -> val - test mean -0.0007 sd 0.0122 (val better than test in 3/5)
+  chosen xgb seed 0: rounds 994, {'colsample_bytree': 0.97186, 'gamma': 0.00483, 'learning_rate': 0.03753, 'max_depth': 7, 'min_child_weight': 3.04391, 'reg_alpha': 0.00355, 'reg_lambda': 0.00715, 'subsample': 0.56669}
+  chosen lgb seed 0: rounds 714, {'colsample_bytree': 0.66115, 'learning_rate': 0.03768, 'min_child_samples': 26, 'min_split_gain': 0.00119, 'num_leaves': 64, 'reg_alpha': 0.05661, 'reg_lambda': 0.01939, 'subsample': 0.77982}
+  chosen xgb seed 1: rounds 910, {'colsample_bytree': 0.70553, 'gamma': 0.02573, 'learning_rate': 0.02823, 'max_depth': 8, 'min_child_weight': 1.27429, 'reg_alpha': 2.01762, 'reg_lambda': 0.09988, 'subsample': 0.72438}
+  chosen lgb seed 1: rounds 1040, {'colsample_bytree': 0.8456, 'learning_rate': 0.02985, 'min_child_samples': 11, 'min_split_gain': 0.00544, 'num_leaves': 64, 'reg_alpha': 0.02476, 'reg_lambda': 0.09854, 'subsample': 0.61035}
+  chosen xgb seed 2: rounds 1754, {'colsample_bytree': 0.5821, 'gamma': 0.06413, 'learning_rate': 0.02348, 'max_depth': 7, 'min_child_weight': 3.74126, 'reg_alpha': 0.003, 'reg_lambda': 0.01042, 'subsample': 0.77652}
+  chosen lgb seed 2: rounds 1029, {'colsample_bytree': 0.74577, 'learning_rate': 0.02763, 'min_child_samples': 55, 'min_split_gain': 0.0015, 'num_leaves': 32, 'reg_alpha': 0.00521, 'reg_lambda': 0.29498, 'subsample': 0.91471}
+  chosen xgb seed 3: rounds 1714, {'colsample_bytree': 0.62268, 'gamma': 0.00154, 'learning_rate': 0.02194, 'max_depth': 6, 'min_child_weight': 10.96572, 'reg_alpha': 2.94285, 'reg_lambda': 1.0213, 'subsample': 0.72032}
+  chosen lgb seed 3: rounds 996, {'colsample_bytree': 0.59852, 'learning_rate': 0.02409, 'min_child_samples': 8, 'min_split_gain': 0.00184, 'num_leaves': 128, 'reg_alpha': 2.57077, 'reg_lambda': 0.00856, 'subsample': 0.96893}
+  chosen xgb seed 4: rounds 1591, {'colsample_bytree': 0.80775, 'gamma': 0.06627, 'learning_rate': 0.02652, 'max_depth': 6, 'min_child_weight': 1.60257, 'reg_alpha': 0.01842, 'reg_lambda': 5.24735, 'subsample': 0.66812}
+  chosen lgb seed 4: rounds 767, {'colsample_bytree': 0.86749, 'learning_rate': 0.02724, 'min_child_samples': 7, 'min_split_gain': 0.01307, 'num_leaves': 96, 'reg_alpha': 0.15184, 'reg_lambda': 0.03607, 'subsample': 0.77282}
+
+==============================================================================
+5. Rounds chosen by early stopping vs learning rate (seed 0, other params default)
+==============================================================================
+adult      xgb lr=0.3   rounds=   40 test=0.2798 lr*rounds=12.0 sec=1.7
+adult      xgb lr=0.1   rounds=  200 test=0.2757 lr*rounds=20.0 sec=4.1
+adult      xgb lr=0.05  rounds=  373 test=0.2759 lr*rounds=18.7 sec=7.0
+adult      xgb lr=0.02  rounds=  972 test=0.2757 lr*rounds=19.4 sec=17.2
+adult      lgb lr=0.3   rounds=   24 test=0.2816 lr*rounds=7.2 sec=1.1
+adult      lgb lr=0.1   rounds=  127 test=0.2781 lr*rounds=12.7 sec=2.7
+adult      lgb lr=0.05  rounds=  375 test=0.2772 lr*rounds=18.8 sec=6.7
+adult      lgb lr=0.02  rounds=  827 test=0.2769 lr*rounds=16.5 sec=14.3
+california xgb lr=0.3   rounds=  228 test=0.4636 lr*rounds=68.4 sec=4.4
+california xgb lr=0.1   rounds=  713 test=0.4438 lr*rounds=71.3 sec=12.1
+california xgb lr=0.05  rounds= 1015 test=0.4474 lr*rounds=50.8 sec=23.0
+california xgb lr=0.02  rounds= 2465 test=0.4466 lr*rounds=49.3 sec=48.9
+california lgb lr=0.3   rounds=   69 test=0.4572 lr*rounds=20.7 sec=1.2
+california lgb lr=0.1   rounds=  260 test=0.4406 lr*rounds=26.0 sec=3.0
+california lgb lr=0.05  rounds=  947 test=0.4369 lr*rounds=47.4 sec=10.5
+california lgb lr=0.02  rounds= 1785 test=0.4368 lr*rounds=35.7 sec=24.2
+
+==============================================================================
+6. Grid vs random search, 9 fits each (California, LightGBM, 300 rounds fixed)
+==============================================================================
+grid lr=0.0030 l2=0.001: val 0.7506 test 0.7411
+grid lr=0.0030 l2=0.100: val 0.7508 test 0.7415
+grid lr=0.0030 l2=10.000: val 0.7574 test 0.7480
+grid lr=0.0300 l2=0.001: val 0.4771 test 0.4630
+grid lr=0.0300 l2=0.100: val 0.4774 test 0.4632
+grid lr=0.0300 l2=10.000: val 0.4785 test 0.4654
+grid lr=0.3000 l2=0.001: val 0.4822 test 0.4598
+grid lr=0.3000 l2=0.100: val 0.4736 test 0.4624
+grid lr=0.3000 l2=10.000: val 0.4710 test 0.4560
+grid best: lr=0.3000 l2=10.000 val 0.4710 test 0.4560
+random (30 repeats of 9): best val mean 0.4603 sd 0.0029 min 0.4571 max 0.4712
+random best test mean 0.4445 sd 0.0042
+random beats grid on val in 29/30 repeats; on test in 29/30
+1-D sweep lr (l2=0.100): val RMSE range 0.4589-0.7508
+1-D sweep l2 (lr=0.1): val RMSE range 0.4572-0.4653
+
+==============================================================================
+7. HalvingRandomSearchCV vs RandomizedSearchCV, same 27 candidates (Adult, LightGBM)
+==============================================================================
+same 27 candidates sampled: True
+halving iterations: n_resources=[1447, 4341, 13023, 39069], n_candidates=[27, 9, 3, 1]
+RandomizedSearchCV: 119 s, fits=81, best CV log loss 0.2800, test log loss 0.2776
+HalvingRandomSearchCV: 28 s, best CV log loss (last round) 0.2875, test log loss 0.2876
+halving's choice ranks #17 of 27 in the full random search
+
+==============================================================================
+Total wall time 2671 s
+==============================================================================

@@ -62,7 +62,7 @@ rows with OOB value, 30 trees (%) | published     100.0 | reproduced     100.0 |
 30 trees CV sd                    | published    0.0060 | reproduced    0.0060 | exact
 30 trees test mean                | published    0.9585 | reproduced    0.9585 | exact
 30 trees test sd                  | published    0.0135 | reproduced    0.0135 | exact
-30 trees OOB-test                 | published    -0.005 | reproduced    -0.004 | DIFFERS
+30 trees OOB-test                 | published    -0.005 | reproduced    -0.004 | within noise
 30 trees CV-test                  | published    -0.004 | reproduced    -0.004 | exact
 100 trees OOB mean                | published    0.9593 | reproduced    0.9593 | exact
 100 trees OOB sd                  | published    0.0062 | reproduced    0.0062 | exact

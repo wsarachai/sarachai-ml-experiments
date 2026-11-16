@@ -1,0 +1,67 @@
+python 3.13.14 | scikit-learn 1.9.1 | numpy 2.5.5
+
+==============================================================================
+PART 1  Bias-variance decomposition (np.polyfit, RandomState(0), one stream)
+==============================================================================
+Recovered procedure: np.random.RandomState(0); degrees 1..12 run in order on the
+same stream (see bias_variance()). Found after a scratch search of 180 + 600 + 4
+variants (RNG type, seeds, fitter, order of the test noise, one stream vs. a fresh
+stream per degree, per-degree seeds 0..299); only this one matches all 24 cells.
+degree | bias^2 | variance | noise | sum | measured test MSE
+     1 | 0.1997 | 0.0171 | 0.04 | 0.2569 | 0.2565
+     3 | 0.0049 | 0.0089 | 0.04 | 0.0538 | 0.0538
+     5 | 0.0001 | 0.0273 | 0.04 | 0.0674 | 0.0676
+     7 | 0.0050 | 0.5377 | 0.04 | 0.5827 | 0.5844
+     9 | 0.0135 | 3.9808 | 0.04 | 4.0343 | 4.0353
+    12 | 45.0641 | 12184.9381 | 0.04 | 12230.0421 | 12230.2250
+
+Context - the same procedure with seeds 1..10 (min .. max):
+degree  1: bias^2 0.1997..0.2005; variance 0.0178..0.0202; sum 0.2577..0.2604; test MSE 0.2577..0.2611
+degree  3: bias^2 0.0047..0.0049; variance 0.0077..0.0092; sum 0.0524..0.0541; test MSE 0.0522..0.0540
+degree  5: bias^2 0.0000..0.0002; variance 0.0182..0.0452; sum 0.0583..0.0854; test MSE 0.0581..0.0856
+degree  7: bias^2 0.0001..0.0388; variance 0.2058..18.2410; sum 0.2468..18.3198; test MSE 0.2460..18.3197
+degree  9: bias^2 0.0027..0.0959; variance 3.4659..57.7454; sum 3.5188..57.8814; test MSE 3.5220..57.8952
+degree 12: bias^2 8.2646..421.9287; variance 4575.8262..180603.2507; sum 4584.5820..181025.2193; test MSE 4584.6068..181024.7235
+degree with the lowest test MSE per seed: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+Degrees >= 7 swing by orders of magnitude between seeds (a few near-singular
+fits dominate the mean), so only their order of magnitude is meaningful.
+
+==============================================================================
+PART 2  Leakage examples from the scikit-learn 'Common pitfalls' page
+==============================================================================
+test rows not scaled: MSE 62.81; scaled with the train scaler: MSE 0.90
+unrounded MSE without scaling: 62.8087
+selection before split: accuracy 0.76; selection inside the train split: 0.46
+
+==============================================================================
+SUMMARY  published vs reproduced
+==============================================================================
+degree 1 bias^2                                   | published       0.1997 | reproduced       0.1997 | exact
+degree 1 variance                                 | published       0.0171 | reproduced       0.0171 | exact
+degree 1 sum                                      | published       0.2569 | reproduced       0.2569 | exact
+degree 1 test MSE                                 | published       0.2565 | reproduced       0.2565 | exact
+degree 3 bias^2                                   | published       0.0049 | reproduced       0.0049 | exact
+degree 3 variance                                 | published       0.0089 | reproduced       0.0089 | exact
+degree 3 sum                                      | published       0.0538 | reproduced       0.0538 | exact
+degree 3 test MSE                                 | published       0.0538 | reproduced       0.0538 | exact
+degree 5 bias^2                                   | published       0.0001 | reproduced       0.0001 | exact
+degree 5 variance                                 | published       0.0273 | reproduced       0.0273 | exact
+degree 5 sum                                      | published       0.0674 | reproduced       0.0674 | exact
+degree 5 test MSE                                 | published       0.0676 | reproduced       0.0676 | exact
+degree 7 bias^2                                   | published       0.0050 | reproduced       0.0050 | exact
+degree 7 variance                                 | published       0.5377 | reproduced       0.5377 | exact
+degree 7 sum                                      | published       0.5827 | reproduced       0.5827 | exact
+degree 7 test MSE                                 | published       0.5844 | reproduced       0.5844 | exact
+degree 9 bias^2                                   | published       0.0135 | reproduced       0.0135 | exact
+degree 9 variance                                 | published       3.9808 | reproduced       3.9808 | exact
+degree 9 sum                                      | published       4.0343 | reproduced       4.0343 | exact
+degree 9 test MSE                                 | published       4.0353 | reproduced       4.0353 | exact
+degree 12 bias^2                                  | published      45.0641 | reproduced      45.0641 | exact
+degree 12 variance                                | published   12184.9381 | reproduced   12184.9381 | exact
+degree 12 sum                                     | published   12230.0421 | reproduced   12230.0421 | exact
+degree 12 test MSE                                | published   12230.2250 | reproduced   12230.2250 | exact
+lowest test MSE at degree                         | published            3 | reproduced            3 | exact
+MSE when the test rows are not scaled             | published        62.80 | reproduced        62.81 | within noise
+MSE with consistent scaling                       | published         0.90 | reproduced         0.90 | exact
+accuracy with selection before the split          | published         0.76 | reproduced         0.76 | exact
+accuracy with selection on train only (post: 0.5) | published         0.50 | reproduced         0.46 | within noise

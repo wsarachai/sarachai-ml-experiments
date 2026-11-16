@@ -19,6 +19,7 @@ theory 1-(1-1/n)^n = 0.6326   limit 1-1/e = 0.6321
 default_rng(0): mean=0.6327 min=0.5829 max=0.6809 sd=0.0156
 default_rng(42): mean=0.6330 min=0.5653 max=0.6734 sd=0.0164
 sd of the 500-draw mean over 50 repetitions = 0.0007
+RandomState(0).randint: mean=0.6326 min=0.5879 max=0.6834
 per-draw sd of the unique share ~= 0.0157; published min/max are 2.8 and 3.2 sd from the mean
 
 ==============================================================================
@@ -95,6 +96,8 @@ MDI 1000-level: median 0.00263 range 0.00201-0.00728
 MDI 2-level   : median 0.00049 range 0.00035-0.00092
 permutation   : range -0.0053 .. +0.0023
 1000-level MDI > 2-level MDI in 20/20 seeds
+published 0.00449 lies at the 85% quantile of the 20 seeds; 0.00055 at the 65% quantile
+permutation importance is 0.0000 for both columns in 14/20 seeds
 
 ==============================================================================
 PART 8  Defaults, scikit-learn 1.9.1
@@ -105,57 +108,57 @@ RandomForestRegressor: {'n_estimators': 100, 'max_features': 1.0, 'bootstrap': T
 ==============================================================================
 SUMMARY  published vs reproduced
 ==============================================================================
-T1 root Gini (post: 0.5)                | published       0.5000 | reproduced       0.4444 | DIFFERS
-T1 impurity decrease (post: 0.2778)     | published       0.2778 | reproduced       0.2222 | DIFFERS
-toy example (all hand values)           | published     asserted | reproduced     asserted | exact
-theory 1-(1-1/n)^n, n=398               | published       0.6326 | reproduced       0.6326 | exact
-bootstrap mean unique share (500 draws) | published       0.6326 | reproduced       0.6330 | within noise
-bootstrap min unique share              | published       0.5879 | reproduced       0.5653 | within noise
-bootstrap max unique share              | published       0.6834 | reproduced       0.6734 | within noise
-single tree 10 seeds mean               | published       0.9322 | reproduced       0.9322 | exact
-single tree 10 seeds SD (population)    | published       0.0206 | reproduced       0.0206 | exact
-single tree 10 seeds min                | published       0.8947 | reproduced       0.8947 | exact
-single tree 10 seeds max                | published       0.9649 | reproduced       0.9649 | exact
-forest 300 10 seeds mean                | published       0.9579 | reproduced       0.9579 | exact
-forest 300 10 seeds SD (population)     | published       0.0090 | reproduced       0.0090 | exact
-forest 300 10 seeds min                 | published       0.9474 | reproduced       0.9474 | exact
-forest 300 10 seeds max                 | published       0.9708 | reproduced       0.9708 | exact
-seed-42 tree depth                      | published            6 | reproduced            6 | exact
-seed-42 tree leaves                     | published           16 | reproduced           16 | exact
-seed-42 tree train acc                  | published       1.0000 | reproduced       1.0000 | exact
-seed-42 tree test acc                   | published       0.9181 | reproduced       0.9181 | exact
-forest 1 trees train                    | published       0.9774 | reproduced       0.9774 | exact
-forest 1 trees test                     | published       0.9123 | reproduced       0.9123 | exact
-forest 1 trees OOB                      | published       0.5829 | reproduced       0.5829 | exact
-forest 3 trees train                    | published       0.9874 | reproduced       0.9874 | exact
-forest 3 trees test                     | published       0.9240 | reproduced       0.9240 | exact
-forest 3 trees OOB                      | published       0.8065 | reproduced       0.8065 | exact
-forest 5 trees train                    | published       0.9899 | reproduced       0.9899 | exact
-forest 5 trees test                     | published       0.9357 | reproduced       0.9357 | exact
-forest 5 trees OOB                      | published       0.9070 | reproduced       0.9070 | exact
-forest 10 trees train                   | published       1.0000 | reproduced       1.0000 | exact
-forest 10 trees test                    | published       0.9298 | reproduced       0.9298 | exact
-forest 10 trees OOB                     | published       0.9497 | reproduced       0.9497 | exact
-forest 30 trees train                   | published       0.9975 | reproduced       0.9975 | exact
-forest 30 trees test                    | published       0.9357 | reproduced       0.9357 | exact
-forest 30 trees OOB                     | published       0.9472 | reproduced       0.9472 | exact
-forest 100 trees train                  | published       1.0000 | reproduced       1.0000 | exact
-forest 100 trees test                   | published       0.9357 | reproduced       0.9357 | exact
-forest 100 trees OOB                    | published       0.9573 | reproduced       0.9573 | exact
-forest 300 trees train                  | published       1.0000 | reproduced       1.0000 | exact
-forest 300 trees test                   | published       0.9415 | reproduced       0.9415 | exact
-forest 300 trees OOB                    | published       0.9673 | reproduced       0.9673 | exact
-max_features=1 test                     | published       0.9474 | reproduced       0.9474 | exact
-max_features=1 OOB                      | published       0.9623 | reproduced       0.9623 | exact
-max_features=log2 test                  | published       0.9357 | reproduced       0.9357 | exact
-max_features=log2 OOB                   | published       0.9623 | reproduced       0.9623 | exact
-max_features=sqrt test                  | published       0.9415 | reproduced       0.9415 | exact
-max_features=sqrt OOB                   | published       0.9673 | reproduced       0.9673 | exact
-max_features=10 test                    | published       0.9357 | reproduced       0.9357 | exact
-max_features=10 OOB                     | published       0.9698 | reproduced       0.9698 | exact
-max_features=None test                  | published       0.9415 | reproduced       0.9415 | exact
-max_features=None OOB                   | published       0.9623 | reproduced       0.9623 | exact
-MDI 1000-level noise column (seed 0)    | published      0.00449 | reproduced      0.00223 | within noise
-MDI 2-level noise column (seed 0)       | published      0.00055 | reproduced      0.00041 | within noise
-permutation importance both noise cols  | published       0.0000 | reproduced       0.0053 | DIFFERS
-default parameter table                 | published as published | reproduced as published | exact
+T1 root Gini (post: 0.5)                      | published       0.5000 | reproduced       0.4444 | DIFFERS
+T1 impurity decrease (post: 0.2778)           | published       0.2778 | reproduced       0.2222 | DIFFERS
+toy example (all hand values)                 | published     asserted | reproduced     asserted | exact
+theory 1-(1-1/n)^n, n=398                     | published       0.6326 | reproduced       0.6326 | exact
+bootstrap mean unique share (500 draws)       | published       0.6326 | reproduced       0.6326 | exact
+bootstrap min unique share                    | published       0.5879 | reproduced       0.5879 | exact
+bootstrap max unique share                    | published       0.6834 | reproduced       0.6834 | exact
+single tree 10 seeds mean                     | published       0.9322 | reproduced       0.9322 | exact
+single tree 10 seeds SD (population)          | published       0.0206 | reproduced       0.0206 | exact
+single tree 10 seeds min                      | published       0.8947 | reproduced       0.8947 | exact
+single tree 10 seeds max                      | published       0.9649 | reproduced       0.9649 | exact
+forest 300 10 seeds mean                      | published       0.9579 | reproduced       0.9579 | exact
+forest 300 10 seeds SD (population)           | published       0.0090 | reproduced       0.0090 | exact
+forest 300 10 seeds min                       | published       0.9474 | reproduced       0.9474 | exact
+forest 300 10 seeds max                       | published       0.9708 | reproduced       0.9708 | exact
+seed-42 tree depth                            | published            6 | reproduced            6 | exact
+seed-42 tree leaves                           | published           16 | reproduced           16 | exact
+seed-42 tree train acc                        | published       1.0000 | reproduced       1.0000 | exact
+seed-42 tree test acc                         | published       0.9181 | reproduced       0.9181 | exact
+forest 1 trees train                          | published       0.9774 | reproduced       0.9774 | exact
+forest 1 trees test                           | published       0.9123 | reproduced       0.9123 | exact
+forest 1 trees OOB                            | published       0.5829 | reproduced       0.5829 | exact
+forest 3 trees train                          | published       0.9874 | reproduced       0.9874 | exact
+forest 3 trees test                           | published       0.9240 | reproduced       0.9240 | exact
+forest 3 trees OOB                            | published       0.8065 | reproduced       0.8065 | exact
+forest 5 trees train                          | published       0.9899 | reproduced       0.9899 | exact
+forest 5 trees test                           | published       0.9357 | reproduced       0.9357 | exact
+forest 5 trees OOB                            | published       0.9070 | reproduced       0.9070 | exact
+forest 10 trees train                         | published       1.0000 | reproduced       1.0000 | exact
+forest 10 trees test                          | published       0.9298 | reproduced       0.9298 | exact
+forest 10 trees OOB                           | published       0.9497 | reproduced       0.9497 | exact
+forest 30 trees train                         | published       0.9975 | reproduced       0.9975 | exact
+forest 30 trees test                          | published       0.9357 | reproduced       0.9357 | exact
+forest 30 trees OOB                           | published       0.9472 | reproduced       0.9472 | exact
+forest 100 trees train                        | published       1.0000 | reproduced       1.0000 | exact
+forest 100 trees test                         | published       0.9357 | reproduced       0.9357 | exact
+forest 100 trees OOB                          | published       0.9573 | reproduced       0.9573 | exact
+forest 300 trees train                        | published       1.0000 | reproduced       1.0000 | exact
+forest 300 trees test                         | published       0.9415 | reproduced       0.9415 | exact
+forest 300 trees OOB                          | published       0.9673 | reproduced       0.9673 | exact
+max_features=1 test                           | published       0.9474 | reproduced       0.9474 | exact
+max_features=1 OOB                            | published       0.9623 | reproduced       0.9623 | exact
+max_features=log2 test                        | published       0.9357 | reproduced       0.9357 | exact
+max_features=log2 OOB                         | published       0.9623 | reproduced       0.9623 | exact
+max_features=sqrt test                        | published       0.9415 | reproduced       0.9415 | exact
+max_features=sqrt OOB                         | published       0.9673 | reproduced       0.9673 | exact
+max_features=10 test                          | published       0.9357 | reproduced       0.9357 | exact
+max_features=10 OOB                           | published       0.9698 | reproduced       0.9698 | exact
+max_features=None test                        | published       0.9415 | reproduced       0.9415 | exact
+max_features=None OOB                         | published       0.9623 | reproduced       0.9623 | exact
+MDI 1000-level noise col (median of 20 seeds) | published      0.00449 | reproduced      0.00263 | within noise
+MDI 2-level noise col (median of 20 seeds)    | published      0.00055 | reproduced      0.00049 | within noise
+perm. importance 0 for both (share of seeds)  | published  0.0000 both | reproduced  14/20 seeds | within noise
+default parameter table                       | published as published | reproduced as published | exact

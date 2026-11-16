@@ -1,0 +1,77 @@
+python 3.13.14 | xgboost 3.4.1 | numpy 2.5.5
+
+==============================================================================
+PART 1  Hand calculation (squared error, depth 1)
+==============================================================================
+F0 = mean(y) = 26.0
+
+lambda = 0
+split  | G_L    H_L | G_R    H_R | 1/2 GL^2/(HL+l) | 1/2 GR^2/(HR+l) | gain
+x<1.5  |   16.0  1.0 |  -16.0  5.0 |         128.000 |          25.600 |  153.600
+x<2.5  |   30.0  2.0 |  -30.0  4.0 |         225.000 |         112.500 |  337.500
+x<3.5  |   45.0  3.0 |  -45.0  3.0 |         337.500 |         337.500 |  675.000
+x<4.5  |   31.0  4.0 |  -31.0  2.0 |         120.125 |         240.250 |  360.375
+x<5.5  |   15.0  5.0 |  -15.0  1.0 |          22.500 |         112.500 |  135.000
+
+lambda = 1, eta = 0.3
+split  | G_L    H_L | G_R    H_R | 1/2 GL^2/(HL+l) | 1/2 GR^2/(HR+l) | gain
+x<1.5  |   16.0  1.0 |  -16.0  5.0 |          64.000 |          21.333 |   85.333
+x<2.5  |   30.0  2.0 |  -30.0  4.0 |         150.000 |          90.000 |  240.000
+x<3.5  |   45.0  3.0 |  -45.0  3.0 |         253.125 |         253.125 |  506.250
+x<4.5  |   31.0  4.0 |  -31.0  2.0 |          96.100 |         160.167 |  256.267
+x<5.5  |   15.0  5.0 |  -15.0  1.0 |          18.750 |          56.250 |   75.000
+
+tree 2 (lambda = 0) on F1
+split  | G_L    H_L | G_R    H_R | 1/2 GL^2/(HL+l) | 1/2 GR^2/(HR+l) | gain
+x<1.5  |    1.0  1.0 |   -1.0  5.0 |           0.500 |           0.100 |    0.600
+x<2.5  |    0.0  2.0 |    0.0  4.0 |           0.000 |           0.000 |    0.000
+x<3.5  |    0.0  3.0 |    0.0  3.0 |           0.000 |           0.000 |    0.000
+x<4.5  |    1.0  4.0 |   -1.0  2.0 |           0.125 |           0.250 |    0.375
+x<5.5  |    0.0  5.0 |    0.0  1.0 |           0.000 |           0.000 |    0.000
+
+logistic, y = [0,0,1,1], base_score 0.5
+gain=2.0 w_L=-2.0 p_L=0.1192 p_R=0.8808 (base added as raw 0.5: 0.1824)
+all hand-calculated values assert OK
+
+==============================================================================
+PART 2  Check against xgboost 3.4.1 (tree_method='exact')
+==============================================================================
+tree 0: {"nodeid": 0, "depth": 0, "split": "f0", "split_condition": 3.5, "yes": 1, "no": 2, "missing": 1, "gain": 1350, "cover": 6, "children": [{"nodeid": 1, "leaf": -15, "cover": 3}, {"nodeid": 2, "leaf": 15, "cover": 3}]}
+predict after tree 1: [11.0, 11.0, 11.0, 41.0, 41.0, 41.0]  after tree 2: [10.0, 11.199999809265137, 11.199999809265137, 41.20000076293945, 41.20000076293945, 41.20000076293945]
+lambda=1, eta=0.3: [22.625, 22.625, 22.625, 29.375, 29.375, 29.375]
+logistic: [0.11919999867677689, 0.11919999867677689, 0.8808000087738037, 0.8808000087738037] gain 4
+
+gamma / min_child_weight (lambda = 0):
+  {'gamma': 600}: split  predict=[11.0, 11.0, 11.0, 41.0, 41.0, 41.0]
+  {'gamma': 1000}: split  predict=[11.0, 11.0, 11.0, 41.0, 41.0, 41.0]
+  {'gamma': 1350}: split  predict=[11.0, 11.0, 11.0, 41.0, 41.0, 41.0]
+  {'gamma': 1351}: no split  predict=[26.0, 26.0, 26.0, 26.0, 26.0, 26.0]
+  {'min_child_weight': 3.0}: split  predict=[11.0, 11.0, 11.0, 41.0, 41.0, 41.0]
+  {'min_child_weight': 3.5}: no split  predict=[26.0, 26.0, 26.0, 26.0, 26.0, 26.0]
+
+base_score chosen automatically: [2.6E1]
+
+==============================================================================
+SUMMARY  published vs reproduced
+==============================================================================
+lambda=0 gain table (5 splits)                   | published                     asserted | reproduced                     asserted | exact
+lambda=1 gain table + leaves                     | published                     asserted | reproduced                     asserted | exact
+tree-2 gain table + predictions                  | published                     asserted | reproduced                     asserted | exact
+logistic hand values                             | published                     asserted | reproduced                     asserted | exact
+split chosen                                     | published                        x<3.5 | reproduced                        x<3.5 | exact
+gain reported by xgboost                         | published                       1350.0 | reproduced                       1350.0 | exact
+leaf weights                                     | published                  -15.0/+15.0 | reproduced                  -15.0/+15.0 | exact
+prediction after tree 1                          | published            11 11 11 41 41 41 | reproduced            11 11 11 41 41 41 | exact
+prediction after tree 2                          | published  10 11.2 11.2 41.2 41.2 41.2 | reproduced  10 11.2 11.2 41.2 41.2 41.2 | exact
+tree 2 split                                     | published                        x<1.5 | reproduced                        x<1.5 | exact
+lambda=1 eta=0.3 predictions                     | published                22.625/29.375 | reproduced                22.625/29.375 | exact
+logistic probabilities                           | published                0.1192/0.8808 | reproduced                0.1192/0.8808 | exact
+{'gamma': 600}                                   | published                        split | reproduced                        split | exact
+{'gamma': 1000}                                  | published                        split | reproduced                        split | exact
+{'gamma': 1350}                                  | published                        split | reproduced                        split | exact
+{'gamma': 1351}                                  | published                     no split | reproduced                     no split | exact
+{'gamma': 1351} predicts 26 everywhere           | published                           26 | reproduced                           26 | exact
+{'min_child_weight': 3.0}                        | published                        split | reproduced                        split | exact
+{'min_child_weight': 3.5}                        | published                     no split | reproduced                     no split | exact
+{'min_child_weight': 3.5} predicts 26 everywhere | published                           26 | reproduced                           26 | exact
+automatic base_score (= mean y)                  | published                         26.0 | reproduced                         26.0 | exact
